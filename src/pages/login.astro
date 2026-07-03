@@ -90,7 +90,7 @@ import Base from '../layouts/Base.astro';
     const password = (document.getElementById('password') as HTMLInputElement).value;
 
     try {
-      const res = await fetch('https://api.slotted.de/auth/login', {
+      const res = await fetch(`${window.SL_API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email, password }),

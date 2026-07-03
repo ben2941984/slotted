@@ -1,7 +1,5 @@
 ---
-export const prerender = false;
-import Base from '../../layouts/Base.astro';
-const { slug } = Astro.params;
+import Base from '../layouts/Base.astro';
 ---
 <Base title={`Book a slot`}>
   <div class="booking-wrap">
@@ -172,8 +170,9 @@ const { slug } = Astro.params;
   .load-error { color: #DC2626; font-size: 0.9rem; }
 </style>
 
-<script define:vars={{ slug }}>
-  const API = 'https://api.slotted.de';
+<script>
+  const API = window.SL_API;
+  const slug = new URLSearchParams(window.location.search).get('s') || '';
   let settings = null;
   let slots = {};
   let selectedDate = null;

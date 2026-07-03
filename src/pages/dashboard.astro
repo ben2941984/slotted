@@ -164,7 +164,7 @@ import Base from '../layouts/Base.astro';
   if (linkEl && slug) linkEl.textContent = `slotted.de/book/${slug}`;
 
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
-    await fetch('https://api.slotted.de/auth/logout', {
+    await fetch(`${window.SL_API}/auth/logout`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     });
@@ -176,7 +176,7 @@ import Base from '../layouts/Base.astro';
 
   async function loadBookings() {
     try {
-      const res = await fetch('https://api.slotted.de/bookings', {
+      const res = await fetch(`${window.SL_API}/bookings`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
       });
       const data = await res.json();
@@ -206,7 +206,7 @@ import Base from '../layouts/Base.astro';
         btn.addEventListener('click', async () => {
           if (!confirm('Cancel this booking?')) return;
           const id = (btn as HTMLElement).dataset.id;
-          await fetch(`https://api.slotted.de/bookings/${id}/cancel`, {
+          await fetch(`${window.SL_API}/bookings/${id}/cancel`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
           });

@@ -176,7 +176,7 @@ import Base from '../../layouts/Base.astro';
   if (!token) window.location.href = '/login';
 
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
-    await fetch('https://api.slotted.de/auth/logout', {
+    await fetch(`${window.SL_API}/auth/logout`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     });
@@ -187,7 +187,7 @@ import Base from '../../layouts/Base.astro';
   // Load saved settings
   async function loadSettings() {
     try {
-      const res = await fetch('https://api.slotted.de/settings', {
+      const res = await fetch(`${window.SL_API}/settings`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
       });
       const s = await res.json();
@@ -227,7 +227,7 @@ import Base from '../../layouts/Base.astro';
     try {
       const user = (document.getElementById('caldav-user') as HTMLInputElement).value;
       const pass = (document.getElementById('caldav-pass') as HTMLInputElement).value;
-      const res = await fetch('https://api.slotted.de/settings/caldav-discover', {
+      const res = await fetch(`${window.SL_API}/settings/caldav-discover`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ caldav_user: user, caldav_pass: pass }),
@@ -270,7 +270,7 @@ import Base from '../../layouts/Base.astro';
     };
 
     try {
-      const res = await fetch('https://api.slotted.de/settings', {
+      const res = await fetch(`${window.SL_API}/settings`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
