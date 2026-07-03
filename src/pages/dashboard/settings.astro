@@ -95,8 +95,9 @@ import Base from '../../layouts/Base.astro';
               <input id="caldav-url" type="url" placeholder="https://p…-caldav.icloud.com/…" />
             </div>
             <button type="button" class="btn-secondary" id="discover-btn">Detect calendar URL</button>
-            <div id="icloud-connected-wrap" style="display:none;margin-top:0.75rem">
+            <div id="icloud-connected-wrap" style="display:none;margin-top:0.75rem;align-items:center;gap:1rem">
               <span class="google-ok">✓ iCloud Calendar connected</span>
+              <button type="button" class="btn-disconnect" id="icloud-disconnect-btn">Disconnect</button>
             </div>
           </section>
 
@@ -238,6 +239,19 @@ import Base from '../../layouts/Base.astro';
   // Google OAuth connect
   document.getElementById('google-connect-btn')?.addEventListener('click', () => {
     window.location.href = `${window.SL_API}/auth/google/redirect?token=${encodeURIComponent(token)}`;
+  });
+
+  // iCloud disconnect
+  document.getElementById('icloud-disconnect-btn')?.addEventListener('click', async () => {
+    if (!confirm('Disconnect iCloud Calendar?')) return;
+    await fetch(`${window.SL_API}/caldav/disconnect`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    (document.getElementById('icloud-connected-wrap') as HTMLElement).style.display = 'none';
+    (document.getElementById('caldav-user') as HTMLInputElement).value = '';
+    (document.getElementById('caldav-pass') as HTMLInputElement).value = '';
+    (document.getElementById('caldav-url') as HTMLInputElement).value = '';
   });
 
   // Google disconnect
