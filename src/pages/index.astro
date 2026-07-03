@@ -7,19 +7,23 @@ import Base from '../layouts/Base.astro';
     <nav class="nav">
       <span class="nav-logo">Slotted</span>
       <div class="nav-right">
-        <a href="/login" class="nav-login">Log in</a>
-        <a href="/signup" class="btn-primary">Get started free</a>
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+        <a href="/login" class="nav-login" id="nav-login">Log in</a>
+        <a href="/signup" class="btn-primary" id="nav-signup">Get started free</a>
       </div>
     </nav>
 
     <main>
       <section class="hero">
-        <div class="hero-kicker">Booking, simplified</div>
-        <h1>Your clients book.<br /><span class="accent">You get a reminder.</span></h1>
-        <p class="hero-sub">One link or one embed. Syncs with iCloud Calendar. Google Meet included. No monthly fee to get started.</p>
+        <div class="hero-kicker" id="hero-kicker">Booking, simplified</div>
+        <h1 id="hero-h1">Your clients book.<br /><span class="accent" id="hero-h1-accent">You get a reminder.</span></h1>
+        <p class="hero-sub" id="hero-sub">One link or one embed. Syncs with iCloud Calendar. Google Meet included. No monthly fee to get started.</p>
         <div class="hero-cta">
-          <a href="/signup" class="btn-primary btn-lg">Get started free</a>
-          <a href="/book?s=demo" class="btn-ghost btn-lg">See a live demo →</a>
+          <a href="/signup" class="btn-primary btn-lg" id="cta-signup">Get started free</a>
+          <a href="/book?s=demo" class="btn-ghost btn-lg" id="cta-demo">See a live demo →</a>
         </div>
       </section>
 
@@ -27,18 +31,18 @@ import Base from '../layouts/Base.astro';
         <div class="steps">
           <div class="step">
             <div class="step-num">1</div>
-            <h3>Connect your calendar</h3>
-            <p>Enter your Apple ID and an app password. Slotted reads your busy times and blocks them automatically.</p>
+            <h3 id="step1-h">Connect your calendar</h3>
+            <p id="step1-p">Enter your Apple ID and an app password. Slotted reads your busy times and blocks them automatically.</p>
           </div>
           <div class="step">
             <div class="step-num">2</div>
-            <h3>Share your link</h3>
-            <p>Send <code>slotted.de/book?s=yourname</code> to a client or embed the booking widget on your site with one line of code.</p>
+            <h3 id="step2-h">Share your link</h3>
+            <p id="step2-p">Send <code>slotted.de/book?s=yourname</code> to a client or embed the booking widget on your site with one line of code.</p>
           </div>
           <div class="step">
             <div class="step-num">3</div>
-            <h3>Get a reminder</h3>
-            <p>Client books, you get an email with all the details and a calendar invite. Nothing to manage.</p>
+            <h3 id="step3-h">Get a reminder</h3>
+            <p id="step3-p">Client books, you get an email with all the details and a calendar invite. Nothing to manage.</p>
           </div>
         </div>
       </section>
@@ -47,41 +51,41 @@ import Base from '../layouts/Base.astro';
         <div class="feature-grid">
           <div class="feature">
             <div class="feature-icon">📅</div>
-            <h4>iCloud sync</h4>
-            <p>Reads your existing calendar. No double bookings.</p>
+            <h4 id="f1-h">iCloud sync</h4>
+            <p id="f1-p">Reads your existing calendar. No double bookings.</p>
           </div>
           <div class="feature">
             <div class="feature-icon">🎥</div>
-            <h4>Google Meet</h4>
-            <p>Clients choose phone or Meet. Link is generated automatically.</p>
+            <h4 id="f2-h">Google Meet</h4>
+            <p id="f2-p">Clients choose phone or Meet. Link is generated automatically.</p>
           </div>
           <div class="feature">
             <div class="feature-icon">🔗</div>
-            <h4>Embeddable</h4>
-            <p>One iframe. Fits any website, portfolio, or landing page.</p>
+            <h4 id="f3-h">Embeddable</h4>
+            <p id="f3-p">One iframe. Fits any website, portfolio, or landing page.</p>
           </div>
           <div class="feature">
             <div class="feature-icon">✉️</div>
-            <h4>Auto confirmations</h4>
-            <p>Client and you both get an email with a .ics invite attached.</p>
+            <h4 id="f4-h">Auto confirmations</h4>
+            <p id="f4-p">Client and you both get an email with a .ics invite attached.</p>
           </div>
           <div class="feature">
             <div class="feature-icon">❌</div>
-            <h4>Cancellation link</h4>
-            <p>Every confirmation includes a cancel link. No back-and-forth.</p>
+            <h4 id="f5-h">Cancellation link</h4>
+            <p id="f5-p">Every confirmation includes a cancel link. No back-and-forth.</p>
           </div>
           <div class="feature">
             <div class="feature-icon">⚙️</div>
-            <h4>Your schedule</h4>
-            <p>Set your hours, buffer time, lead time, and blackout dates.</p>
+            <h4 id="f6-h">Your schedule</h4>
+            <p id="f6-p">Set your hours, buffer time, lead time, and blackout dates.</p>
           </div>
         </div>
       </section>
 
       <section class="cta-bottom">
-        <h2>Ready in five minutes.</h2>
-        <p>No credit card. No sales call. Just a link.</p>
-        <a href="/signup" class="btn-primary btn-lg">Create your booking page</a>
+        <h2 id="cta-h">Ready in five minutes.</h2>
+        <p id="cta-p">No credit card. No sales call. Just a link.</p>
+        <a href="/signup" class="btn-primary btn-lg" id="cta-btn">Create your booking page</a>
       </section>
     </main>
 
@@ -232,4 +236,107 @@ import Base from '../layouts/Base.astro';
   }
   .footer a { color: #9CA3AF; }
   .footer a:hover { color: #0D0D0D; }
+
+  /* Lang toggle */
+  .lang-toggle { display: flex; gap: 0.25rem; }
+  .lang-btn { background: none; border: 1px solid #D1D5DB; color: #6B7280; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 5px; font-family: inherit; transition: all 0.1s; }
+  .lang-btn:hover { border-color: #9CA3AF; color: #374151; }
+  .lang-btn.active { border-color: #2563EB; color: #2563EB; background: #EFF6FF; }
 </style>
+
+<script>
+  const T = {
+    en: {
+      login:    'Log in',
+      signup:   'Get started free',
+      kicker:   'Booking, simplified',
+      h1line1:  'Your clients book.',
+      h1line2:  'You get a reminder.',
+      sub:      'One link or one embed. Syncs with iCloud Calendar. Google Meet included. No monthly fee to get started.',
+      ctaSignup: 'Get started free',
+      ctaDemo:   'See a live demo →',
+      step1h: 'Connect your calendar',
+      step1p: 'Enter your Apple ID and an app password. Slotted reads your busy times and blocks them automatically.',
+      step2h: 'Share your link',
+      step2p: 'Send slotted.de/book?s=yourname to a client or embed the booking widget on your site with one line of code.',
+      step3h: 'Get a reminder',
+      step3p: 'Client books, you get an email with all the details and a calendar invite. Nothing to manage.',
+      f1h: 'iCloud sync',        f1p: 'Reads your existing calendar. No double bookings.',
+      f2h: 'Google Meet',        f2p: 'Clients choose phone or Meet. Link is generated automatically.',
+      f3h: 'Embeddable',         f3p: 'One iframe. Fits any website, portfolio, or landing page.',
+      f4h: 'Auto confirmations', f4p: 'Client and you both get an email with a .ics invite attached.',
+      f5h: 'Cancellation link',  f5p: 'Every confirmation includes a cancel link. No back-and-forth.',
+      f6h: 'Your schedule',      f6p: 'Set your hours, buffer time, lead time, and blackout dates.',
+      ctaH: 'Ready in five minutes.',
+      ctaP: 'No credit card. No sales call. Just a link.',
+      ctaBtn: 'Create your booking page',
+    },
+    de: {
+      login:    'Anmelden',
+      signup:   'Kostenlos starten',
+      kicker:   'Buchungen, vereinfacht',
+      h1line1:  'Deine Kunden buchen.',
+      h1line2:  'Du bekommst eine Erinnerung.',
+      sub:      'Ein Link oder ein Embed. Synchronisiert mit iCloud-Kalender. Google Meet inklusive. Kein Monatsbeitrag für den Start.',
+      ctaSignup: 'Kostenlos starten',
+      ctaDemo:   'Live-Demo ansehen →',
+      step1h: 'Kalender verbinden',
+      step1p: 'Apple-ID und App-Passwort eingeben. Slotted liest deine gebuchten Zeiten und blockiert sie automatisch.',
+      step2h: 'Link teilen',
+      step2p: 'Sende slotted.de/book?s=deinname an einen Kunden oder bette das Widget mit einer Zeile Code auf deiner Website ein.',
+      step3h: 'Erinnerung erhalten',
+      step3p: 'Kunde bucht, du bekommst eine E-Mail mit allen Details und eine Kalendereinladung. Nichts zu verwalten.',
+      f1h: 'iCloud-Sync',         f1p: 'Liest deinen bestehenden Kalender. Keine Doppelbuchungen.',
+      f2h: 'Google Meet',          f2p: 'Kunden wählen Telefon oder Meet. Link wird automatisch erstellt.',
+      f3h: 'Einbettbar',           f3p: 'Ein iframe. Passt auf jede Website, Portfolio oder Landingpage.',
+      f4h: 'Automatische Bestätigung', f4p: 'Kunde und du bekommen eine E-Mail mit .ics-Einladung.',
+      f5h: 'Stornierungslink',     f5p: 'Jede Bestätigung enthält einen Stornierungslink. Kein Hin und Her.',
+      f6h: 'Dein Zeitplan',        f6p: 'Stunden, Pufferzeit, Vorlaufzeit und gesperrte Tage festlegen.',
+      ctaH: 'In fünf Minuten bereit.',
+      ctaP: 'Keine Kreditkarte. Kein Verkaufsgespräch. Nur ein Link.',
+      ctaBtn: 'Buchungsseite erstellen',
+    },
+  };
+
+  type Lang = 'en' | 'de';
+  const stored = localStorage.getItem('sl_lang') as Lang | null;
+  const browser = (navigator.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
+  let lang: Lang = stored ?? browser;
+
+  function applyLang() {
+    const t = T[lang];
+    const s = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    s('nav-login',      t.login);
+    s('nav-signup',     t.signup);
+    s('hero-kicker',    t.kicker);
+    s('hero-h1-accent', t.h1line2);
+    s('hero-sub',       t.sub);
+    s('cta-signup',     t.ctaSignup);
+    s('cta-demo',       t.ctaDemo);
+    s('step1-h', t.step1h); s('step1-p', t.step1p);
+    s('step2-h', t.step2h); s('step2-p', t.step2p);
+    s('step3-h', t.step3h); s('step3-p', t.step3p);
+    s('f1-h', t.f1h); s('f1-p', t.f1p);
+    s('f2-h', t.f2h); s('f2-p', t.f2p);
+    s('f3-h', t.f3h); s('f3-p', t.f3p);
+    s('f4-h', t.f4h); s('f4-p', t.f4p);
+    s('f5-h', t.f5h); s('f5-p', t.f5p);
+    s('f6-h', t.f6h); s('f6-p', t.f6p);
+    s('cta-h',   t.ctaH);
+    s('cta-p',   t.ctaP);
+    s('cta-btn', t.ctaBtn);
+    // h1 first text node
+    const h1 = document.getElementById('hero-h1');
+    if (h1) h1.childNodes[0].textContent = t.h1line1 + '\n';
+    document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    localStorage.setItem('sl_lang', lang);
+  }
+
+  applyLang();
+
+  document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(b => {
+    b.addEventListener('click', () => { lang = b.dataset.lang as Lang; applyLang(); });
+  });
+</script>
