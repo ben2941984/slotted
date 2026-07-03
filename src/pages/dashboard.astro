@@ -335,12 +335,13 @@ import Base from '../layouts/Base.astro';
     const params = new URLSearchParams({ s: slug });
     if (theme  !== 'light')   params.set('theme',  theme);
     if (layout !== 'default') params.set('layout', layout);
-    if (lang   !== 'en')      params.set('lang',   lang);
+    // No ?lang= in snippet — widget auto-detects from parent page
 
     const bookUrl = `https://slotted.de/book?${params}`;
     const height  = layout === 'mini' ? '420' : '600';
     const radius  = layout === 'mini' ? '10px' : '12px';
-    _embedSnippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:${radius};border:1px solid #e5e7eb"\n></iframe>`;
+    const iframeId = 'slotted-iframe';
+    _embedSnippet = `<iframe id="${iframeId}" src="${bookUrl}" width="100%" height="${height}" frameborder="0" style="border-radius:${radius};border:1px solid #e5e7eb"></iframe>\n<script>\n(function(){\n  var f=document.getElementById('${iframeId}');\n  var l=(document.documentElement.lang||navigator.language||'en').split('-')[0].toLowerCase();\n  f.addEventListener('load',function(){f.contentWindow.postMessage({type:'sl-lang',lang:l},'*');});\n})();\n<\/script>`;
 
     const panel = document.getElementById('embed-panel') as HTMLElement;
     panel.style.display = '';

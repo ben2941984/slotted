@@ -502,7 +502,8 @@ import Base from '../layouts/Base.astro';
   const layout = params.get('layout') || 'default';
 
   const browserLang = (navigator.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
-  const lang = (params.get('lang') || browserLang) as 'en' | 'de';
+  const langParam   = params.get('lang');
+  let lang = ((langParam === 'de' || langParam === 'en') ? langParam : browserLang) as 'en' | 'de';
 
   const T = {
     en: {
@@ -554,29 +555,49 @@ import Base from '../layouts/Base.astro';
       days:          ['Mo','Di','Mi','Do','Fr','Sa','So'],
     },
   };
-  const t = T[lang];
+  let t = T[lang];
 
-  // Apply translations to static HTML
-  const setTxt = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setTxt  = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   const setAttr = (id: string, attr: string, val: string) => { const el = document.getElementById(id) as HTMLInputElement; if (el) el[attr] = val; };
 
-  setTxt('video-or-phone-label', t.videoOrPhone);
-  setTxt('step-dates-heading',   t.selectDate);
-  setTxt('step-details-heading', t.yourDetails);
-  setTxt('label-fullname',       t.fullName);
-  setTxt('label-email',          t.email);
-  setTxt('label-calltype',       t.callType);
-  setTxt('label-phone',          t.phoneNumber);
-  setTxt('label-phone-opt',      t.phoneCall);
-  setTxt('label-meet-opt',       t.googleMeet ?? 'Google Meet');
-  setTxt('btn-book',             t.confirm);
-  setTxt('success-heading',      t.booked);
-  setTxt('success-hint-txt',     t.emailHint);
-  setTxt('back-to-dates-label',  t.back);
-  setTxt('back-to-times-label',  t.back);
-  setAttr('b-name',  'placeholder', t.fullNamePh);
-  setAttr('b-email', 'placeholder', t.emailPh);
-  setAttr('b-phone', 'placeholder', t.phonePh);
+  function applyTranslations() {
+    t = T[lang];
+    setTxt('video-or-phone-label', t.videoOrPhone);
+    setTxt('step-dates-heading',   t.selectDate);
+    setTxt('step-details-heading', t.yourDetails);
+    setTxt('label-fullname',       t.fullName);
+    setTxt('label-email',          t.email);
+    setTxt('label-calltype',       t.callType);
+    setTxt('label-phone',          t.phoneNumber);
+    setTxt('label-phone-opt',      t.phoneCall);
+    setTxt('label-meet-opt',       'Google Meet');
+    setTxt('btn-book',             t.confirm);
+    setTxt('success-heading',      t.booked);
+    setTxt('success-hint-txt',     t.emailHint);
+    setTxt('back-to-dates-label',  t.back);
+    setTxt('back-to-times-label',  t.back);
+    setAttr('b-name',  'placeholder', t.fullNamePh);
+    setAttr('b-email', 'placeholder', t.emailPh);
+    setAttr('b-phone', 'placeholder', t.phonePh);
+    // Re-render calendar if already visible (updates day names)
+    if (document.getElementById('step-dates')?.style.display !== 'none') {
+      renderCalendar();
+    }
+  }
+
+  applyTranslations();
+
+  // Listen for language from parent page (only when no explicit ?lang= param)
+  if (!langParam) {
+    window.addEventListener('message', (e) => {
+      if (e.data?.type !== 'sl-lang') return;
+      const received = e.data.lang === 'de' ? 'de' : 'en';
+      if (received !== lang) {
+        lang = received;
+        applyTranslations();
+      }
+    });
+  }
 
   // Apply theme + layout immediately
   const bookingUi = document.getElementById('booking-ui');
