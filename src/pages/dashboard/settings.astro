@@ -103,18 +103,19 @@ import Base from '../../layouts/Base.astro';
             <p class="section-desc">When enabled, customers can choose a Google Meet call instead of a phone call. A Meet link is generated automatically.</p>
             <div class="field">
               <label for="google-client-id">Google Client ID</label>
-              <input id="google-client-id" type="text" placeholder="….apps.googleusercontent.com" />
+              <input id="google-client-id" type="text" autocomplete="off" placeholder="….apps.googleusercontent.com" />
             </div>
             <div class="field">
               <label for="google-client-secret">Client Secret</label>
-              <input id="google-client-secret" type="password" />
+              <input id="google-client-secret" type="text" autocomplete="off" placeholder="GOCSPX-…" />
             </div>
             <div id="google-status" class="google-status"></div>
             <div id="google-connect-wrap" style="display:none;margin-top:0.75rem">
               <button type="button" class="btn-secondary" id="google-connect-btn">Connect Google Calendar →</button>
             </div>
-            <div id="google-connected-wrap" style="display:none;margin-top:0.75rem">
+            <div id="google-connected-wrap" style="display:none;margin-top:0.75rem;align-items:center;gap:1rem">
               <span class="google-ok">✓ Google Calendar connected</span>
+              <button type="button" class="btn-disconnect" id="google-disconnect-btn">Disconnect</button>
             </div>
           </section>
 
@@ -176,6 +177,8 @@ import Base from '../../layouts/Base.astro';
   .save-msg.error { background: #FEF2F2; color: #DC2626; }
   .google-status { font-size: 0.85rem; margin-top: 0.5rem; }
   .google-ok { font-size: 0.85rem; color: #16A34A; font-weight: 500; }
+  .btn-disconnect { background: none; border: 1px solid #E5E7EB; border-radius: 6px; padding: 0.3rem 0.75rem; font-size: 0.8rem; color: #6B7280; font-family: inherit; cursor: pointer; }
+  .btn-disconnect:hover { border-color: #DC2626; color: #DC2626; }
 </style>
 
 <script>
@@ -217,7 +220,7 @@ import Base from '../../layouts/Base.astro';
 
       const clientId = (document.getElementById('google-client-id') as HTMLInputElement).value;
       if (s.google_connected) {
-        (document.getElementById('google-connected-wrap') as HTMLElement).style.display = '';
+        (document.getElementById('google-connected-wrap') as HTMLElement).style.display = 'flex';
       } else if (clientId) {
         (document.getElementById('google-connect-wrap') as HTMLElement).style.display = '';
       }
@@ -231,6 +234,18 @@ import Base from '../../layouts/Base.astro';
   // Google OAuth connect
   document.getElementById('google-connect-btn')?.addEventListener('click', () => {
     window.location.href = `${window.SL_API}/auth/google/redirect?token=${encodeURIComponent(token)}`;
+  });
+
+  // Google disconnect
+  document.getElementById('google-disconnect-btn')?.addEventListener('click', async () => {
+    if (!confirm('Disconnect Google Calendar?')) return;
+    await fetch(`${window.SL_API}/auth/google/disconnect`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    (document.getElementById('google-connected-wrap') as HTMLElement).style.display = 'none';
+    const clientId = (document.getElementById('google-client-id') as HTMLInputElement).value;
+    if (clientId) (document.getElementById('google-connect-wrap') as HTMLElement).style.display = '';
   });
 
   // Show success/error from OAuth callback redirect
@@ -308,6 +323,13 @@ import Base from '../../layouts/Base.astro';
       if (payload.slug) localStorage.setItem('sl_slug', payload.slug);
       saveMsg.className = 'save-msg success';
       saveMsg.textContent = 'Settings saved.';
+      // Show connect button after save if client ID is present but not yet connected
+      const clientIdVal = payload.google_client_id;
+      const connectedWrap = document.getElementById('google-connected-wrap') as HTMLElement;
+      const connectWrap   = document.getElementById('google-connect-wrap') as HTMLElement;
+      if (clientIdVal && connectedWrap.style.display === 'none') {
+        connectWrap.style.display = '';
+      }
     } catch {
       saveMsg.className = 'save-msg error';
       saveMsg.textContent = 'Could not save. Please try again.';
