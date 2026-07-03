@@ -4,27 +4,33 @@ import Base from '../layouts/Base.astro';
 <Base title="Sign up">
   <div class="auth-wrap">
     <div class="auth-card">
-      <h1 class="auth-title">Create your account</h1>
-      <p class="auth-sub">Free to start. No credit card required.</p>
+      <div class="auth-top">
+        <h1 class="auth-title" id="auth-title">Create your account</h1>
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+      </div>
+      <p class="auth-sub" id="auth-sub">Free to start. No credit card required.</p>
 
       <form class="auth-form" id="signup-form">
         <div class="field">
-          <label for="name">Name</label>
+          <label for="name" id="label-name">Name</label>
           <input id="name" type="text" placeholder="Jane Doe" autocomplete="name" required />
         </div>
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email" id="label-email">Email</label>
           <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
         </div>
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password" id="label-password">Password</label>
           <input id="password" type="password" placeholder="Min. 8 characters" required />
         </div>
         <div id="error-msg" class="error-msg" style="display:none"></div>
         <button type="submit" class="btn-primary" id="submit-btn">Create account</button>
       </form>
 
-      <p class="auth-footer">Already have an account? <a href="/login">Log in</a></p>
+      <p class="auth-footer" id="auth-footer">Already have an account? <a href="/login" id="footer-link">Log in</a></p>
     </div>
   </div>
 </Base>
@@ -37,106 +43,131 @@ import Base from '../layouts/Base.astro';
     justify-content: center;
     padding: 2rem 1rem;
   }
-  .auth-card {
-    width: 100%;
-    max-width: 400px;
-  }
-  .auth-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-  }
-  .auth-sub {
-    color: #6B7280;
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-  }
-  .auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .field label {
-    font-size: 0.85rem;
-    font-weight: 500;
-  }
+  .auth-card { width: 100%; max-width: 400px; }
+  .auth-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.25rem; }
+  .auth-title { font-size: 1.5rem; font-weight: 700; }
+  .lang-toggle { display: flex; gap: 0.2rem; margin-top: 0.35rem; }
+  .lang-btn { background: none; border: none; color: #9CA3AF; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; padding: 0.15rem 0.35rem; border-radius: 4px; font-family: inherit; }
+  .lang-btn:hover { color: #111; }
+  .lang-btn.active { color: #111; background: #F3F4F6; }
+  .auth-sub { color: #6B7280; margin-bottom: 2rem; font-size: 0.9rem; }
+  .auth-form { display: flex; flex-direction: column; gap: 1rem; }
+  .field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field label { font-size: 0.85rem; font-weight: 500; }
   .field input {
-    border: 1px solid #D1D5DB;
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.95rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s;
+    border: 1px solid #D1D5DB; border-radius: 8px;
+    padding: 0.6rem 0.75rem; font-size: 0.95rem; font-family: inherit;
+    outline: none; transition: border-color 0.15s;
   }
   .field input:focus { border-color: #2563EB; }
   .btn-primary {
-    background: #2563EB;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.7rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background 0.15s;
+    background: #2563EB; color: #fff; border: none; border-radius: 8px;
+    padding: 0.7rem; font-size: 0.95rem; font-weight: 600; font-family: inherit;
+    cursor: pointer; margin-top: 0.5rem; transition: background 0.15s;
   }
   .btn-primary:hover { background: #1D4ED8; }
   .btn-primary:disabled { opacity: 0.6; cursor: default; }
   .error-msg {
-    background: #FEF2F2;
-    color: #DC2626;
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.85rem;
+    background: #FEF2F2; color: #DC2626; border-radius: 8px;
+    padding: 0.6rem 0.75rem; font-size: 0.85rem;
   }
-  .auth-footer {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.875rem;
-    color: #6B7280;
-  }
+  .auth-footer { margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #6B7280; }
   .auth-footer a { color: #2563EB; font-weight: 500; }
 </style>
 
 <script>
-  const form = document.getElementById('signup-form') as HTMLFormElement;
-  const btn = document.getElementById('submit-btn') as HTMLButtonElement;
-  const err = document.getElementById('error-msg') as HTMLDivElement;
+  const T = {
+    en: {
+      title:       'Create your account',
+      sub:         'Free to start. No credit card required.',
+      labelName:   'Name',
+      labelEmail:  'Email',
+      labelPw:     'Password',
+      namePh:      'Jane Doe',
+      pwPh:        'Min. 8 characters',
+      submit:      'Create account',
+      submitting:  'Creating account…',
+      error:       'Something went wrong.',
+      footer:      'Already have an account?',
+      footerLink:  'Log in',
+    },
+    de: {
+      title:       'Konto erstellen',
+      sub:         'Kostenlos starten. Keine Kreditkarte erforderlich.',
+      labelName:   'Name',
+      labelEmail:  'E-Mail',
+      labelPw:     'Passwort',
+      namePh:      'Max Mustermann',
+      pwPh:        'Mind. 8 Zeichen',
+      submit:      'Konto erstellen',
+      submitting:  'Konto wird erstellt…',
+      error:       'Etwas ist schiefgelaufen.',
+      footer:      'Bereits ein Konto?',
+      footerLink:  'Anmelden',
+    },
+  };
 
-  form.addEventListener('submit', async (e) => {
+  type Lang = 'en' | 'de';
+  const stored = localStorage.getItem('sl_lang') as Lang | null;
+  const browser = (navigator.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
+  let lang: Lang = stored ?? browser;
+
+  const btn      = document.getElementById('submit-btn') as HTMLButtonElement;
+  const err      = document.getElementById('error-msg') as HTMLDivElement;
+  const nameInput = document.getElementById('name') as HTMLInputElement;
+  const pwInput   = document.getElementById('password') as HTMLInputElement;
+
+  function applyLang() {
+    const t = T[lang];
+    const s = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    s('auth-title',    t.title);
+    s('auth-sub',      t.sub);
+    s('label-name',    t.labelName);
+    s('label-email',   t.labelEmail);
+    s('label-password', t.labelPw);
+    s('submit-btn',    t.submit);
+    s('footer-link',   t.footerLink);
+    (document.getElementById('auth-footer') as HTMLElement).childNodes[0].textContent = t.footer + ' ';
+    nameInput.placeholder = t.namePh;
+    pwInput.placeholder   = t.pwPh;
+    document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    localStorage.setItem('sl_lang', lang);
+  }
+
+  applyLang();
+
+  document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(b => {
+    b.addEventListener('click', () => { lang = b.dataset.lang as Lang; applyLang(); });
+  });
+
+  document.getElementById('signup-form')!.addEventListener('submit', async (e) => {
     e.preventDefault();
     btn.disabled = true;
-    btn.textContent = 'Creating account…';
+    btn.textContent = T[lang].submitting;
     err.style.display = 'none';
 
-    const name = (document.getElementById('name') as HTMLInputElement).value;
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const name     = nameInput.value;
+    const email    = (document.getElementById('email') as HTMLInputElement).value;
+    const password = pwInput.value;
 
     try {
-      const res = await fetch(`${window.SL_API}/auth/register`, {
+      const res  = await fetch(`${window.SL_API}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Something went wrong.');
+      if (!res.ok) throw new Error(data.message || T[lang].error);
       localStorage.setItem('sl_token', data.token);
       localStorage.setItem('sl_name', data.user?.name ?? name);
       window.location.href = '/dashboard';
     } catch (e: any) {
-      err.textContent = e.message;
-      err.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Create account';
+      err.textContent    = e.message;
+      err.style.display  = 'block';
+      btn.disabled       = false;
+      btn.textContent    = T[lang].submit;
     }
   });
 </script>
