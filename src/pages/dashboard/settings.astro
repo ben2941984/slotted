@@ -1,0 +1,291 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Settings">
+  <div class="shell">
+    <nav class="sidebar">
+      <div class="sidebar-logo">Slotted</div>
+      <ul class="sidebar-nav">
+        <li><a href="/dashboard">Bookings</a></li>
+        <li><a href="/dashboard/settings" class="active">Settings</a></li>
+      </ul>
+      <button class="logout-btn" id="logout-btn">Log out</button>
+    </nav>
+
+    <main class="main">
+      <header class="main-header">
+        <h1>Settings</h1>
+      </header>
+
+      <div class="settings-wrap">
+        <form id="settings-form">
+
+          <!-- Booking page -->
+          <section class="settings-section">
+            <h2>Booking page</h2>
+            <div class="field">
+              <label for="slug">Your booking link</label>
+              <div class="slug-wrap">
+                <span class="slug-prefix">slotted.de/book/</span>
+                <input id="slug" type="text" placeholder="your-name" pattern="[a-z0-9\-]+" required />
+              </div>
+              <p class="hint">Lowercase letters, numbers and hyphens only.</p>
+            </div>
+          </section>
+
+          <!-- Schedule -->
+          <section class="settings-section">
+            <h2>Schedule</h2>
+            <div class="fields-row">
+              <div class="field">
+                <label for="slot-minutes">Slot length (min)</label>
+                <input id="slot-minutes" type="number" min="5" max="480" value="30" />
+              </div>
+              <div class="field">
+                <label for="buffer-minutes">Buffer after slot (min)</label>
+                <input id="buffer-minutes" type="number" min="0" max="240" value="0" />
+              </div>
+              <div class="field">
+                <label for="days-ahead">Days available ahead</label>
+                <input id="days-ahead" type="number" min="1" max="365" value="21" />
+              </div>
+              <div class="field">
+                <label for="lead-hours">Min. lead time (hours)</label>
+                <input id="lead-hours" type="number" min="0" max="720" value="24" />
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="field">
+                <label for="day-start">Day start</label>
+                <input id="day-start" type="time" value="09:00" />
+              </div>
+              <div class="field">
+                <label for="day-end">Day end</label>
+                <input id="day-end" type="time" value="17:00" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Working days</label>
+              <div class="weekday-wrap">
+                {['Mo','Tu','We','Th','Fr','Sa','Su'].map((d, i) => (
+                  <label class="weekday">
+                    <input type="checkbox" value={i + 1} checked={i < 5} class="wd-check" />
+                    {d}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <!-- iCloud -->
+          <section class="settings-section">
+            <h2>iCloud Calendar</h2>
+            <p class="section-desc">Busy times from your iCloud calendar are blocked automatically. New bookings are added to your calendar.</p>
+            <div class="field">
+              <label for="caldav-user">Apple ID</label>
+              <input id="caldav-user" type="email" placeholder="you@icloud.com" />
+            </div>
+            <div class="field">
+              <label for="caldav-pass">App password</label>
+              <input id="caldav-pass" type="password" placeholder="xxxx-xxxx-xxxx-xxxx" />
+              <p class="hint">Create at appleid.apple.com → Sign-In and Security → App Passwords</p>
+            </div>
+            <div class="field">
+              <label for="caldav-url">Calendar URL <span class="optional">(auto-detected)</span></label>
+              <input id="caldav-url" type="url" placeholder="https://p…-caldav.icloud.com/…" />
+            </div>
+            <button type="button" class="btn-secondary" id="discover-btn">Detect calendar URL</button>
+          </section>
+
+          <!-- Google Meet -->
+          <section class="settings-section">
+            <h2>Google Meet</h2>
+            <p class="section-desc">When enabled, customers can choose a Google Meet call instead of a phone call. A Meet link is generated automatically.</p>
+            <div class="field">
+              <label for="google-client-id">Google Client ID</label>
+              <input id="google-client-id" type="text" placeholder="….apps.googleusercontent.com" />
+            </div>
+            <div class="field">
+              <label for="google-client-secret">Client Secret</label>
+              <input id="google-client-secret" type="password" />
+            </div>
+            <div id="google-status" class="google-status"></div>
+          </section>
+
+          <div id="save-msg" class="save-msg" style="display:none"></div>
+          <button type="submit" class="btn-primary" id="save-btn">Save settings</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<style>
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; flex-shrink: 0; background: #0D0D0D; color: #fff; display: flex; flex-direction: column; padding: 1.5rem 1rem; }
+  .sidebar-logo { font-size: 1.1rem; font-weight: 700; padding: 0 0.5rem; margin-bottom: 1.5rem; }
+  .sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+  .sidebar-nav a { display: block; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.875rem; color: #9CA3AF; transition: background 0.1s, color 0.1s; }
+  .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.08); color: #fff; }
+  .logout-btn { background: none; border: none; color: #6B7280; font-size: 0.8rem; font-family: inherit; cursor: pointer; text-align: left; padding: 0.5rem 0.75rem; }
+  .logout-btn:hover { color: #fff; }
+
+  .main { flex: 1; }
+  .main-header { display: flex; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid #E5E7EB; }
+  .main-header h1 { font-size: 1.1rem; font-weight: 600; }
+
+  .settings-wrap { padding: 1.5rem 2rem; max-width: 640px; }
+  .settings-section { margin-bottom: 2.5rem; }
+  .settings-section h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .section-desc { font-size: 0.85rem; color: #6B7280; margin-bottom: 1rem; }
+
+  .field { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.75rem; }
+  .field label { font-size: 0.85rem; font-weight: 500; }
+  .field input {
+    border: 1px solid #D1D5DB; border-radius: 8px;
+    padding: 0.6rem 0.75rem; font-size: 0.9rem; font-family: inherit;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: #2563EB; }
+  .hint { font-size: 0.78rem; color: #9CA3AF; }
+  .optional { font-weight: 400; color: #9CA3AF; }
+
+  .slug-wrap { display: flex; align-items: center; border: 1px solid #D1D5DB; border-radius: 8px; overflow: hidden; }
+  .slug-wrap:focus-within { border-color: #2563EB; }
+  .slug-prefix { padding: 0.6rem 0.75rem; background: #F3F4F6; font-size: 0.875rem; color: #6B7280; white-space: nowrap; }
+  .slug-wrap input { border: none; padding: 0.6rem 0.75rem; font-size: 0.9rem; font-family: inherit; outline: none; flex: 1; }
+
+  .fields-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+
+  .weekday-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+  .weekday { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer; }
+
+  .btn-primary { background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 0.7rem 1.5rem; font-size: 0.9rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+  .btn-primary:hover { background: #1D4ED8; }
+  .btn-secondary { background: #F3F4F6; color: #0D0D0D; border: none; border-radius: 8px; padding: 0.55rem 1rem; font-size: 0.85rem; font-weight: 500; font-family: inherit; cursor: pointer; margin-top: 0.5rem; transition: background 0.15s; }
+  .btn-secondary:hover { background: #E5E7EB; }
+
+  .save-msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
+  .save-msg.success { background: #DCFCE7; color: #16A34A; }
+  .save-msg.error { background: #FEF2F2; color: #DC2626; }
+  .google-status { font-size: 0.85rem; margin-top: 0.5rem; }
+</style>
+
+<script>
+  const token = localStorage.getItem('sl_token');
+  if (!token) window.location.href = '/login';
+
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await fetch('https://api.slotted.de/auth/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    localStorage.clear();
+    window.location.href = '/login';
+  });
+
+  // Load saved settings
+  async function loadSettings() {
+    try {
+      const res = await fetch('https://api.slotted.de/settings', {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+      });
+      const s = await res.json();
+
+      (document.getElementById('slug') as HTMLInputElement).value = s.slug ?? '';
+      (document.getElementById('slot-minutes') as HTMLInputElement).value = s.slot_minutes ?? 30;
+      (document.getElementById('buffer-minutes') as HTMLInputElement).value = s.buffer_minutes ?? 0;
+      (document.getElementById('days-ahead') as HTMLInputElement).value = s.days_ahead ?? 21;
+      (document.getElementById('lead-hours') as HTMLInputElement).value = s.booking_lead_hours ?? 24;
+      (document.getElementById('day-start') as HTMLInputElement).value = s.day_start ?? '09:00';
+      (document.getElementById('day-end') as HTMLInputElement).value = s.day_end ?? '17:00';
+      (document.getElementById('caldav-user') as HTMLInputElement).value = s.caldav_user ?? '';
+      (document.getElementById('caldav-url') as HTMLInputElement).value = s.caldav_url ?? '';
+      (document.getElementById('google-client-id') as HTMLInputElement).value = s.google_client_id ?? '';
+
+      const workdays: number[] = s.workdays ? s.workdays.split(',').map(Number) : [1,2,3,4,5];
+      document.querySelectorAll<HTMLInputElement>('.wd-check').forEach(cb => {
+        cb.checked = workdays.includes(Number(cb.value));
+      });
+
+      if (s.google_connected) {
+        (document.getElementById('google-status') as HTMLElement).innerHTML =
+          '<span style="color:#16A34A">✓ Google Calendar connected</span>';
+      }
+
+      if (s.slug) localStorage.setItem('sl_slug', s.slug);
+    } catch {}
+  }
+
+  loadSettings();
+
+  // Detect iCloud calendar URL
+  document.getElementById('discover-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('discover-btn') as HTMLButtonElement;
+    btn.textContent = 'Detecting…';
+    btn.disabled = true;
+    try {
+      const user = (document.getElementById('caldav-user') as HTMLInputElement).value;
+      const pass = (document.getElementById('caldav-pass') as HTMLInputElement).value;
+      const res = await fetch('https://api.slotted.de/settings/caldav-discover', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ caldav_user: user, caldav_pass: pass }),
+      });
+      const data = await res.json();
+      if (data.url) (document.getElementById('caldav-url') as HTMLInputElement).value = data.url;
+    } catch {}
+    btn.textContent = 'Detect calendar URL';
+    btn.disabled = false;
+  });
+
+  // Save
+  const form = document.getElementById('settings-form') as HTMLFormElement;
+  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+  const saveMsg = document.getElementById('save-msg') as HTMLElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    saveMsg.style.display = 'none';
+
+    const workdays = Array.from(document.querySelectorAll<HTMLInputElement>('.wd-check:checked'))
+      .map(cb => cb.value).join(',');
+
+    const payload = {
+      slug:                 (document.getElementById('slug') as HTMLInputElement).value,
+      slot_minutes:         Number((document.getElementById('slot-minutes') as HTMLInputElement).value),
+      buffer_minutes:       Number((document.getElementById('buffer-minutes') as HTMLInputElement).value),
+      days_ahead:           Number((document.getElementById('days-ahead') as HTMLInputElement).value),
+      booking_lead_hours:   Number((document.getElementById('lead-hours') as HTMLInputElement).value),
+      day_start:            (document.getElementById('day-start') as HTMLInputElement).value,
+      day_end:              (document.getElementById('day-end') as HTMLInputElement).value,
+      workdays,
+      caldav_user:          (document.getElementById('caldav-user') as HTMLInputElement).value,
+      caldav_pass:          (document.getElementById('caldav-pass') as HTMLInputElement).value,
+      caldav_url:           (document.getElementById('caldav-url') as HTMLInputElement).value,
+      google_client_id:     (document.getElementById('google-client-id') as HTMLInputElement).value,
+      google_client_secret: (document.getElementById('google-client-secret') as HTMLInputElement).value,
+    };
+
+    try {
+      const res = await fetch('https://api.slotted.de/settings', {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to save.');
+      if (payload.slug) localStorage.setItem('sl_slug', payload.slug);
+      saveMsg.className = 'save-msg success';
+      saveMsg.textContent = 'Settings saved.';
+    } catch {
+      saveMsg.className = 'save-msg error';
+      saveMsg.textContent = 'Could not save. Please try again.';
+    }
+
+    saveMsg.style.display = 'block';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save settings';
+  });
+</script>

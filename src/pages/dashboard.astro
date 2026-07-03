@@ -1,0 +1,220 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Dashboard">
+  <div class="shell">
+    <nav class="sidebar">
+      <div class="sidebar-logo">Slotted</div>
+      <ul class="sidebar-nav">
+        <li><a href="/dashboard" class="active">Bookings</a></li>
+        <li><a href="/dashboard/settings">Settings</a></li>
+      </ul>
+      <button class="logout-btn" id="logout-btn">Log out</button>
+    </nav>
+
+    <main class="main">
+      <header class="main-header">
+        <h1 id="page-title">Bookings</h1>
+        <div class="header-right">
+          <span class="booking-link" id="booking-link"></span>
+        </div>
+      </header>
+
+      <div id="bookings-wrap">
+        <div class="empty-state" id="empty-state" style="display:none">
+          No bookings yet. Share your booking link to get started.
+        </div>
+        <table class="bookings-table" id="bookings-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Date & time</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="bookings-body"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<style>
+  .shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #0D0D0D;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+    gap: 0.5rem;
+  }
+  .sidebar-logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    padding: 0 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+  .sidebar-nav a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #9CA3AF;
+    transition: background 0.1s, color 0.1s;
+  }
+  .sidebar-nav a:hover, .sidebar-nav a.active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+  .logout-btn {
+    background: none;
+    border: none;
+    color: #6B7280;
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    transition: color 0.1s;
+  }
+  .logout-btn:hover { color: #fff; }
+
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  .main-header h1 { font-size: 1.1rem; font-weight: 600; }
+  .booking-link {
+    font-size: 0.8rem;
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-family: monospace;
+  }
+
+  #bookings-wrap { padding: 1.5rem 2rem; }
+  .empty-state {
+    color: #6B7280;
+    font-size: 0.9rem;
+    padding: 3rem 0;
+    text-align: center;
+  }
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .bookings-table th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  .bookings-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .status-confirmed { background: #DCFCE7; color: #16A34A; }
+  .status-cancelled { background: #FEF2F2; color: #DC2626; }
+  .cancel-btn {
+    font-size: 0.75rem;
+    color: #DC2626;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+  .cancel-btn:hover { text-decoration: underline; }
+</style>
+
+<script>
+  const token = localStorage.getItem('sl_token');
+  if (!token) window.location.href = '/login';
+
+  const slug = localStorage.getItem('sl_slug') || '';
+  const linkEl = document.getElementById('booking-link');
+  if (linkEl && slug) linkEl.textContent = `slotted.de/book/${slug}`;
+
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await fetch('https://api.slotted.de/auth/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    localStorage.removeItem('sl_token');
+    localStorage.removeItem('sl_name');
+    localStorage.removeItem('sl_slug');
+    window.location.href = '/login';
+  });
+
+  async function loadBookings() {
+    try {
+      const res = await fetch('https://api.slotted.de/bookings', {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+      });
+      const data = await res.json();
+      const bookings: any[] = data.data ?? data ?? [];
+
+      if (bookings.length === 0) {
+        (document.getElementById('empty-state') as HTMLElement).style.display = 'block';
+        return;
+      }
+
+      const table = document.getElementById('bookings-table') as HTMLElement;
+      const tbody = document.getElementById('bookings-body') as HTMLElement;
+      table.style.display = 'table';
+
+      tbody.innerHTML = bookings.map((b: any) => `
+        <tr>
+          <td>${new Date(b.start_dt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })} – ${new Date(b.end_dt).toLocaleTimeString('de-DE', { timeStyle: 'short' })}</td>
+          <td>${b.name}</td>
+          <td>${b.email}</td>
+          <td>${b.is_google_meet ? 'Google Meet' : 'Phone'}</td>
+          <td><span class="status-badge status-${b.status}">${b.status}</span></td>
+          <td>${b.status === 'confirmed' ? `<button class="cancel-btn" data-id="${b.id}">Cancel</button>` : ''}</td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Cancel this booking?')) return;
+          const id = (btn as HTMLElement).dataset.id;
+          await fetch(`https://api.slotted.de/bookings/${id}/cancel`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+          });
+          loadBookings();
+        });
+      });
+    } catch {}
+  }
+
+  loadBookings();
+</script>

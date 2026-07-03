@@ -1,0 +1,343 @@
+---
+export const prerender = false;
+import Base from '../../layouts/Base.astro';
+const { slug } = Astro.params;
+---
+<Base title={`Book a slot`}>
+  <div class="booking-wrap">
+    <div class="booking-card">
+      <div class="booking-header">
+        <h1 id="owner-name">Book a call</h1>
+        <p class="slot-duration" id="slot-duration"></p>
+      </div>
+
+      <div id="step-dates" class="step">
+        <h2>Pick a date</h2>
+        <div class="calendar" id="calendar"></div>
+      </div>
+
+      <div id="step-times" class="step" style="display:none">
+        <button class="back-btn" id="back-to-dates">← Back</button>
+        <h2 id="times-heading">Available times</h2>
+        <div class="slots-grid" id="slots-grid"></div>
+      </div>
+
+      <div id="step-form" class="step" style="display:none">
+        <button class="back-btn" id="back-to-times">← Back</button>
+        <h2 id="selected-slot-label"></h2>
+
+        <form id="booking-form">
+          <div class="field">
+            <label for="b-name">Your name</label>
+            <input id="b-name" type="text" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="b-email">Email</label>
+            <input id="b-email" type="email" required autocomplete="email" />
+          </div>
+
+          <div class="meeting-toggle">
+            <label class="toggle-opt" id="opt-phone">
+              <input type="radio" name="meeting-type" value="phone" checked /> Phone call
+            </label>
+            <label class="toggle-opt" id="opt-meet">
+              <input type="radio" name="meeting-type" value="meet" /> Google Meet
+            </label>
+          </div>
+
+          <div class="field" id="phone-field">
+            <label for="b-phone">Phone number</label>
+            <input id="b-phone" type="tel" autocomplete="tel" />
+          </div>
+
+          <div id="form-error" class="form-error" style="display:none"></div>
+          <button type="submit" class="btn-book" id="book-btn">Confirm booking</button>
+        </form>
+      </div>
+
+      <div id="step-success" class="step step-success" style="display:none">
+        <div class="success-icon">✓</div>
+        <h2>You're booked.</h2>
+        <p id="success-detail"></p>
+        <p class="success-hint">Check your email for a confirmation and calendar invite.</p>
+      </div>
+
+      <div id="step-error" class="step" style="display:none">
+        <p class="load-error">This booking page could not be loaded.</p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .booking-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: #F7F7F5;
+  }
+  .booking-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .booking-header { margin-bottom: 1.5rem; }
+  .booking-header h1 { font-size: 1.3rem; font-weight: 700; }
+  .slot-duration { font-size: 0.85rem; color: #6B7280; margin-top: 0.2rem; }
+
+  .step h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; }
+  .back-btn { background: none; border: none; font-size: 0.85rem; color: #6B7280; cursor: pointer; font-family: inherit; padding: 0; margin-bottom: 1rem; }
+  .back-btn:hover { color: #0D0D0D; }
+
+  /* Calendar */
+  .calendar { display: flex; flex-direction: column; gap: 0.5rem; }
+  .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
+  .cal-head { font-size: 0.7rem; color: #9CA3AF; font-weight: 600; padding: 0.25rem 0; }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .cal-day.available:hover { background: #EFF6FF; }
+  .cal-day.selected { background: #2563EB; color: #fff; }
+  .cal-day.empty, .cal-day.past { color: #D1D5DB; cursor: default; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .cal-nav button { background: none; border: none; cursor: pointer; font-size: 1rem; color: #6B7280; padding: 0.25rem 0.5rem; }
+  .cal-nav span { font-size: 0.9rem; font-weight: 600; }
+
+  /* Slots */
+  .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .slot-btn {
+    border: 1px solid #E5E7EB;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.1s, background 0.1s;
+    text-align: center;
+  }
+  .slot-btn:hover { border-color: #2563EB; background: #EFF6FF; }
+  .slot-btn.selected { border-color: #2563EB; background: #2563EB; color: #fff; }
+
+  /* Form */
+  .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; }
+  .field label { font-size: 0.85rem; font-weight: 500; }
+  .field input {
+    border: 1px solid #D1D5DB; border-radius: 8px;
+    padding: 0.6rem 0.75rem; font-size: 0.9rem; font-family: inherit;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: #2563EB; }
+
+  .meeting-toggle { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .toggle-opt { display: flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; cursor: pointer; }
+
+  .form-error { background: #FEF2F2; color: #DC2626; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+
+  .btn-book {
+    width: 100%;
+    background: #2563EB;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 0.25rem;
+  }
+  .btn-book:hover { background: #1D4ED8; }
+  .btn-book:disabled { opacity: 0.6; cursor: default; }
+
+  /* Success */
+  .step-success { text-align: center; padding: 1rem 0; }
+  .success-icon { font-size: 2.5rem; color: #16A34A; margin-bottom: 0.75rem; }
+  .step-success h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .step-success p { color: #6B7280; font-size: 0.9rem; }
+  .success-hint { margin-top: 0.5rem; font-size: 0.8rem; }
+  .load-error { color: #DC2626; font-size: 0.9rem; }
+</style>
+
+<script define:vars={{ slug }}>
+  const API = 'https://api.slotted.de';
+  let settings = null;
+  let slots = {};
+  let selectedDate = null;
+  let selectedSlot = null;
+
+  async function init() {
+    try {
+      const res = await fetch(`${API}/book/${slug}/config`);
+      if (!res.ok) throw new Error();
+      settings = await res.json();
+
+      document.getElementById('owner-name').textContent = `Book a call with ${settings.owner_name}`;
+      document.getElementById('slot-duration').textContent = `${settings.slot_minutes} minutes`;
+
+      const slotsRes = await fetch(`${API}/book/${slug}/slots`);
+      slots = await slotsRes.json();
+
+      renderCalendar();
+    } catch {
+      show('step-error');
+    }
+  }
+
+  function show(id) {
+    ['step-dates','step-times','step-form','step-success','step-error'].forEach(s => {
+      document.getElementById(s).style.display = s === id ? '' : 'none';
+    });
+  }
+
+  // Calendar
+  let calYear = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+
+  function renderCalendar() {
+    const wrap = document.getElementById('calendar');
+    const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+    const monthName = new Date(calYear, calMonth, 1).toLocaleString('en', { month: 'long', year: 'numeric' });
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const offset = (firstDay === 0 ? 6 : firstDay - 1);
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    let html = `<div class="cal-nav">
+      <button id="cal-prev">‹</button>
+      <span>${monthName}</span>
+      <button id="cal-next">›</button>
+    </div>
+    <div class="cal-row">${days.map(d => `<div class="cal-head">${d}</div>`).join('')}</div>`;
+
+    let cells = Array(offset).fill('<div class="cal-day empty"></div>');
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(calYear, calMonth, d);
+      const ymd = date.toISOString().slice(0, 10);
+      const isPast = date < today;
+      const hasSlots = slots[ymd] && slots[ymd].length > 0;
+      const cls = isPast ? 'past' : hasSlots ? 'available' : 'past';
+      const sel = ymd === selectedDate ? ' selected' : '';
+      cells.push(`<div class="cal-day ${cls}${sel}" data-date="${ymd}">${d}</div>`);
+    }
+
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 7) {
+      rows.push(`<div class="cal-row">${cells.slice(i, i+7).join('')}</div>`);
+    }
+    html += rows.join('');
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('.cal-day.available').forEach(el => {
+      el.addEventListener('click', () => {
+        selectedDate = el.dataset.date;
+        renderSlots(selectedDate);
+        show('step-times');
+      });
+    });
+    document.getElementById('cal-prev')?.addEventListener('click', () => {
+      calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    });
+    document.getElementById('cal-next')?.addEventListener('click', () => {
+      calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    });
+  }
+
+  function renderSlots(date) {
+    const heading = document.getElementById('times-heading');
+    heading.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    const grid = document.getElementById('slots-grid');
+    const daySlots = slots[date] || [];
+    grid.innerHTML = daySlots.map(s =>
+      `<button class="slot-btn" data-start="${s.start}" data-end="${s.end}">${s.label.split(' – ')[0]}</button>`
+    ).join('');
+
+    grid.querySelectorAll('.slot-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        grid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSlot = { start: btn.dataset.start, end: btn.dataset.end, label: btn.textContent };
+        document.getElementById('selected-slot-label').textContent =
+          new Date(selectedSlot.start).toLocaleString('en', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        show('step-form');
+      });
+    });
+  }
+
+  document.getElementById('back-to-dates')?.addEventListener('click', () => show('step-dates'));
+  document.getElementById('back-to-times')?.addEventListener('click', () => show('step-times'));
+
+  // Meeting type toggle
+  document.querySelectorAll('input[name="meeting-type"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const phoneField = document.getElementById('phone-field');
+      phoneField.style.display = r.value === 'phone' ? '' : 'none';
+    });
+  });
+
+  // Booking form
+  document.getElementById('booking-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('book-btn');
+    const errEl = document.getElementById('form-error');
+    btn.disabled = true;
+    btn.textContent = 'Confirming…';
+    errEl.style.display = 'none';
+
+    const isGoogleMeet = document.querySelector('input[name="meeting-type"]:checked').value === 'meet';
+    const name = document.getElementById('b-name').value;
+    const email = document.getElementById('b-email').value;
+    const note = document.getElementById('b-phone').value;
+
+    if (!isGoogleMeet && !note) {
+      errEl.textContent = 'Please enter your phone number.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Confirm booking';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/book/${slug}/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          slot_start: selectedSlot.start,
+          name, email, note,
+          is_google_meet: isGoogleMeet ? 1 : 0,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Could not confirm booking.');
+
+      document.getElementById('success-detail').textContent =
+        new Date(selectedSlot.start).toLocaleString('en', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      show('step-success');
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Confirm booking';
+    }
+  });
+
+  init();
+</script>
