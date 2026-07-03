@@ -63,20 +63,26 @@ Einbettbares Buchungssystem als SaaS. Kunden erhalten einen konfigurierbaren Buc
 ```
 POST   auth/register
 POST   auth/login
-POST   auth/logout          (auth:sanctum)
-GET    auth/me              (auth:sanctum)
+POST   auth/logout                  (auth:sanctum)
+GET    auth/me                      (auth:sanctum)
 
-GET    settings             (auth:sanctum)
-PUT    settings             (auth:sanctum)
-POST   settings/caldav-discover (auth:sanctum)
+GET    settings                     (auth:sanctum)
+PUT    settings                     (auth:sanctum)
+POST   settings/caldav-discover     (auth:sanctum)
+DELETE caldav/disconnect            (auth:sanctum)
+GET    settings/caldav-test         (auth:sanctum, Debug)
 
-GET    bookings             (auth:sanctum)
-POST   bookings/{id}/cancel (auth:sanctum)
+GET    bookings                     (auth:sanctum)
+POST   bookings/{id}/cancel         (auth:sanctum)
 
-GET    book/{slug}/config   (public)
-GET    book/{slug}/slots    (public)
-POST   book/{slug}/book     (public)
-GET    cancel/{token}       (public)
+GET    auth/google/redirect         (auth:sanctum, OAuth-Start)
+GET    auth/google/callback         (public, OAuth-Callback)
+DELETE auth/google/disconnect       (auth:sanctum)
+
+GET    book/{slug}/config           (public)
+GET    book/{slug}/slots            (public)
+POST   book/{slug}/book             (public)
+GET    cancel/{token}               (public)
 ```
 
 ### Multi-Tenant
@@ -88,7 +94,7 @@ GET    cancel/{token}       (public)
 
 **`users`** — Standard Laravel (name, email, password)
 
-**`user_settings`** — 1:1 zu users; slug, slot_minutes, buffer_minutes, days_ahead, booking_lead_hours, workdays (CSV "1,2,3,4,5"), day_start, day_end, blackout_dates (CSV), caldav_user, caldav_pass, caldav_url, google_client_id, google_client_secret, google_access_token, google_refresh_token, google_token_expires
+**`user_settings`** — 1:1 zu users; slug, slot_minutes, buffer_minutes, days_ahead, booking_lead_hours, workdays (CSV "1,2,3,4,5"), day_start, day_end, blackout_dates (CSV), caldav_user, caldav_pass, caldav_url, google_client_id, google_client_secret, google_access_token, google_refresh_token, google_token_expires, embed_theme (light/dark), embed_layout (default/mini)
 
 **`bookings`** — user_id, start_dt, end_dt, name, email, note, ip, status (confirmed/cancelled), is_google_meet, timezone, google_meet_link, google_event_id, caldav_uid, cancel_token
 
@@ -102,10 +108,15 @@ GET    cancel/{token}       (public)
 
 ## Bekannte Pitfalls
 
-- **`is:global` in `book.astro`** — Kalender-Tage, Slot-Buttons etc. werden per `innerHTML` injiziert und erhalten kein `data-astro-cid-*` Attribut. Deshalb `<style is:global>` statt `<style>`. Alle Selektoren sind class-spezifisch genug (kein Bleeding-Risiko).
+- **`is:global` in `book.astro` und `dashboard.astro`** — Inhalte via `innerHTML` injiziert erhalten kein `data-astro-cid-*`. Deshalb `<style is:global>`.
 - **`window.SL_API` statt `import.meta.env`** — `import.meta.env` ist nur im Astro-Build verfügbar, nicht in `<script>`-Tags ohne `define:vars`. Base.astro setzt `window.SL_API` via `define:vars` einmalig.
 - **Statische Route `/book`** — kein `[slug].astro` möglich ohne SSR-Adapter. Slug kommt aus `?s=` Query-Parameter.
 - **`$middleware->statefulApi()` entfernt** — war Ursache für CSRF token mismatch beim Register/Login.
+- **Sensitive Fields Guard (Backend)** — `caldav_pass` und `google_client_secret` werden nie mit leerem oder null-Wert überschrieben. Guard in `SettingsController::update()` via `empty($data[$field])`. Laravel wandelt nullable leere Strings manchmal zu null — deshalb `empty()` statt `=== ''`.
+- **`has_caldav_pass` / `has_google_secret`** — Backend gibt nur Boolean-Flags zurück, nie die echten Secrets. Frontend zeigt "✓ connected"-Badge statt Klartext.
+- **Timezone-Bug** — `date.toISOString()` gibt UTC zurück; in CEST (UTC+2) ist Mitternacht lokal = 22:00 UTC des Vortags → immer `toYmd()` mit lokalen Gettern verwenden, nie `toISOString().slice(0,10)`.
+- **Google Event zuerst erstellen** — Google Meet muss vor CalDAV-Event erstellt werden, damit `meet_link` für die CalDAV-Beschreibung verfügbar ist.
+- **CalDAV DESCRIPTION** — Zeilenumbrüche als literal `\n` (Backslash-n), nicht als echter Newline. `escapeIcs()` escaped Kommas und Semikolons.
 
 ---
 
@@ -147,14 +158,25 @@ Bei Fragen zu Slot-Generierung, CalDAV, ICS-Bau oder Absage-Flow dort nachschlag
 - ✅ CalDAV-Integration (Autodiscovery, Busy-Times, Event anlegen/löschen)
 - ✅ Mail mit ICS-Anhang (Bestätigung + Owner-Notify + Absage)
 - ✅ End-to-End getestet: Buchung, Doppelbuchung (409), Stornierung per Token
+- ✅ Google Meet OAuth2 — Client ID + Secret in Settings, Token-Refresh, Meet-Link in Buchungsbestätigung + CalDAV-Notizen
+- ✅ iCloud Disconnect-Button (analog zu Google)
+- ✅ Sensitive Field Guard — caldav_pass + google_client_secret nie mit leer/null überschreiben
+- ✅ has_caldav_pass / has_google_secret Flags — Secrets nie im Klartext zurückgeben
+- ✅ Autofill-Fix — secret fields mit autocomplete="new-password" + setTimeout-Clear mit touchedFields-Guard
+- ✅ Timezone-Fix — toYmd() mit lokalen Gettern statt toISOString()
+- ✅ CalDAV Booking-Details — DESCRIPTION mit Email, Typ, Telefon, Meet-Link
+- ✅ Embed-Design — Theme (light/dark) + Layout (default/mini) wählbar in Settings; ?theme= + ?layout= an /book
+- ✅ Dark Mode + Mini Layout für Buchungswidget
+- ✅ Auto-Save vor Google OAuth-Redirect
+- ✅ EN/DE-Toggle auf allen Seiten (Landing, Login, Signup, Dashboard, Settings, Book)
+- ✅ Buchungswidget liest ?lang= aus URL-Param, fällt auf Browser-Sprache zurück
+- ✅ Embed-Snippet enthält automatisch ?lang=de wenn DE aktiv
 
 ## Offen / nächste Schritte
 
-- ⏳ Google Meet OAuth2 (Client ID + Secret in Settings, Token-Refresh, Meet-Link-Generierung)
 - ⏳ Produktions-Mailer (Resend via SMTP)
-- ⏳ Vercel-Deployment (Frontend) + Hetzner (Backend)
-- ⏳ Git-History aufräumen + GitHub-Repos anlegen
-- ⏳ Embed-Widget testen (iframe auf externer Seite)
+- ⏳ Vercel-Deployment (Frontend, slotted.de) + Hetzner (Backend, api.slotted.de)
+- ⏳ Embed-Widget auf externer Seite testen
 
 ---
 
