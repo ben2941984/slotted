@@ -88,6 +88,7 @@ import Base from '../../layouts/Base.astro';
             <div class="field">
               <label for="caldav-pass">App password</label>
               <input id="caldav-pass" type="password" placeholder="xxxx-xxxx-xxxx-xxxx" />
+              <p id="caldav-pass-hint" class="hint" style="display:none">✓ Saved — leave blank to keep current</p>
               <p class="hint">Create at appleid.apple.com → Sign-In and Security → App Passwords</p>
             </div>
             <div class="field">
@@ -108,6 +109,7 @@ import Base from '../../layouts/Base.astro';
             <div class="field">
               <label for="google-client-secret">Client Secret</label>
               <input id="google-client-secret" type="text" autocomplete="off" placeholder="GOCSPX-…" />
+              <p id="google-secret-hint" class="hint" style="display:none">✓ Saved — leave blank to keep current</p>
             </div>
             <div id="google-status" class="google-status"></div>
             <div id="google-connect-wrap" style="display:none;margin-top:0.75rem">
@@ -212,6 +214,8 @@ import Base from '../../layouts/Base.astro';
       (document.getElementById('caldav-user') as HTMLInputElement).value = s.caldav_user ?? '';
       (document.getElementById('caldav-url') as HTMLInputElement).value = s.caldav_url ?? '';
       (document.getElementById('google-client-id') as HTMLInputElement).value = s.google_client_id ?? '';
+      if (s.has_caldav_pass) (document.getElementById('caldav-pass-hint') as HTMLElement).style.display = '';
+      if (s.has_google_secret) (document.getElementById('google-secret-hint') as HTMLElement).style.display = '';
 
       const workdays: number[] = s.workdays ? s.workdays.split(',').map(Number) : [1,2,3,4,5];
       document.querySelectorAll<HTMLInputElement>('.wd-check').forEach(cb => {
