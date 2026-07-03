@@ -381,10 +381,18 @@ import Base from '../../layouts/Base.astro';
 
   loadSettings();
 
-  // Clear autofilled secret fields — browser fills them but backend never returns the values
+  // Clear autofilled secret fields only if user hasn't touched them
+  const secretFields = ['caldav-pass', 'google-client-secret'];
+  const touchedFields = new Set<string>();
+  secretFields.forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => touchedFields.add(id));
+  });
   setTimeout(() => {
-    (document.getElementById('caldav-pass') as HTMLInputElement).value = '';
-    (document.getElementById('google-client-secret') as HTMLInputElement).value = '';
+    secretFields.forEach(id => {
+      if (!touchedFields.has(id)) {
+        (document.getElementById(id) as HTMLInputElement).value = '';
+      }
+    });
   }, 300);
 
   // Google OAuth connect
