@@ -20,6 +20,23 @@ import Base from '../layouts/Base.astro';
         </div>
       </header>
 
+      <div id="embed-panel" style="display:none">
+        <div class="embed-box">
+          <div class="embed-header">
+            <div>
+              <div class="embed-label">Your booking link</div>
+              <a class="embed-link" id="embed-link" target="_blank" rel="noopener"></a>
+            </div>
+            <button class="embed-toggle" id="embed-toggle">Show embed snippet ↓</button>
+          </div>
+          <div id="embed-snippet" style="display:none">
+            <div class="embed-snippet-label">Paste this on your website</div>
+            <pre id="embed-code" class="embed-code"></pre>
+            <button class="copy-btn" id="copy-btn">Copy</button>
+          </div>
+        </div>
+      </div>
+
       <div id="bookings-wrap">
         <div class="empty-state" id="empty-state" style="display:none">
           No bookings yet. Share your booking link to get started.
@@ -153,6 +170,40 @@ import Base from '../layouts/Base.astro';
     padding: 0;
   }
   .cancel-btn:hover { text-decoration: underline; }
+
+  .embed-box {
+    margin: 1.5rem 2rem 0;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .embed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    background: #F9FAFB;
+  }
+  .embed-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9CA3AF; margin-bottom: 0.2rem; }
+  .embed-link { font-size: 0.875rem; color: #2563EB; font-family: monospace; }
+  .embed-link:hover { text-decoration: underline; }
+  .embed-toggle { background: none; border: 1px solid #D1D5DB; border-radius: 6px; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; color: #374151; transition: background 0.1s; }
+  .embed-toggle:hover { background: #fff; }
+  .embed-snippet-label { font-size: 0.75rem; font-weight: 600; color: #9CA3AF; margin-bottom: 0.5rem; }
+  #embed-snippet { padding: 1rem 1.25rem; border-top: 1px solid #E5E7EB; }
+  .embed-code {
+    background: #0D0D0D;
+    color: #F8FF3D;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0 0 0.75rem;
+  }
+  .copy-btn { background: #0D0D0D; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; transition: background 0.1s; }
+  .copy-btn:hover { background: #374151; }
 </style>
 
 <script>
@@ -161,7 +212,37 @@ import Base from '../layouts/Base.astro';
 
   const slug = localStorage.getItem('sl_slug') || '';
   const linkEl = document.getElementById('booking-link');
-  if (linkEl && slug) linkEl.textContent = `slotted.de/book/${slug}`;
+  if (linkEl && slug) linkEl.textContent = `slotted.de/book?s=${slug}`;
+
+  if (slug) {
+    const bookUrl = `https://slotted.de/book?s=${slug}`;
+    const snippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border-radius:12px;border:1px solid #e5e7eb"\n></iframe>`;
+
+    const panel = document.getElementById('embed-panel') as HTMLElement;
+    panel.style.display = '';
+
+    const linkA = document.getElementById('embed-link') as HTMLAnchorElement;
+    linkA.textContent = bookUrl;
+    linkA.href = `/book?s=${slug}`;
+
+    const code = document.getElementById('embed-code') as HTMLElement;
+    code.textContent = snippet;
+
+    document.getElementById('embed-toggle')?.addEventListener('click', () => {
+      const snip = document.getElementById('embed-snippet') as HTMLElement;
+      const btn  = document.getElementById('embed-toggle') as HTMLButtonElement;
+      const open = snip.style.display === 'none';
+      snip.style.display = open ? '' : 'none';
+      btn.textContent    = open ? 'Hide snippet ↑' : 'Show embed snippet ↓';
+    });
+
+    document.getElementById('copy-btn')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(snippet);
+      const btn = document.getElementById('copy-btn') as HTMLButtonElement;
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  }
 
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await fetch(`${window.SL_API}/auth/logout`, {
