@@ -1,173 +1,414 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title={`Book a slot`}>
-  <div class="booking-wrap">
-    <div class="booking-card">
-      <div class="booking-header">
-        <h1 id="owner-name">Book a call</h1>
-        <p class="slot-duration" id="slot-duration"></p>
-      </div>
+<Base title="Book a slot">
+  <div class="page">
 
-      <div id="step-dates" class="step">
-        <h2>Pick a date</h2>
-        <div class="calendar" id="calendar"></div>
-      </div>
-
-      <div id="step-times" class="step" style="display:none">
-        <button class="back-btn" id="back-to-dates">← Back</button>
-        <h2 id="times-heading">Available times</h2>
-        <div class="slots-grid" id="slots-grid"></div>
-      </div>
-
-      <div id="step-form" class="step" style="display:none">
-        <button class="back-btn" id="back-to-times">← Back</button>
-        <h2 id="selected-slot-label"></h2>
-
-        <form id="booking-form">
-          <div class="field">
-            <label for="b-name">Your name</label>
-            <input id="b-name" type="text" required autocomplete="name" />
-          </div>
-          <div class="field">
-            <label for="b-email">Email</label>
-            <input id="b-email" type="email" required autocomplete="email" />
-          </div>
-
-          <div class="meeting-toggle">
-            <label class="toggle-opt" id="opt-phone">
-              <input type="radio" name="meeting-type" value="phone" checked /> Phone call
-            </label>
-            <label class="toggle-opt" id="opt-meet">
-              <input type="radio" name="meeting-type" value="meet" /> Google Meet
-            </label>
-          </div>
-
-          <div class="field" id="phone-field">
-            <label for="b-phone">Phone number</label>
-            <input id="b-phone" type="tel" autocomplete="tel" />
-          </div>
-
-          <div id="form-error" class="form-error" style="display:none"></div>
-          <button type="submit" class="btn-book" id="book-btn">Confirm booking</button>
-        </form>
-      </div>
-
-      <div id="step-success" class="step step-success" style="display:none">
-        <div class="success-icon">✓</div>
-        <h2>You're booked.</h2>
-        <p id="success-detail"></p>
-        <p class="success-hint">Check your email for a confirmation and calendar invite.</p>
-      </div>
-
-      <div id="step-error" class="step" style="display:none">
-        <p class="load-error">This booking page could not be loaded.</p>
-      </div>
+    <div id="step-loading" class="center-state">
+      <div class="spinner"></div>
     </div>
+
+    <div id="step-error" class="center-state" style="display:none">
+      <p class="error-msg">This booking page could not be found.</p>
+    </div>
+
+    <div id="booking-ui" style="display:none">
+      <aside class="sidebar">
+        <div class="owner-avatar" id="owner-avatar"></div>
+        <h1 id="owner-name"></h1>
+        <div class="meta-row" id="meta-duration">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="duration-label"></span>
+        </div>
+        <div class="meta-row">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Video or phone call</span>
+        </div>
+        <div class="selected-summary" id="selected-summary" style="display:none">
+          <div class="summary-date" id="summary-date"></div>
+          <div class="summary-time" id="summary-time"></div>
+        </div>
+      </aside>
+
+      <main class="main">
+
+        <!-- Step: dates -->
+        <div id="step-dates" class="step">
+          <div class="step-header">
+            <h2>Select a date</h2>
+          </div>
+          <div class="calendar" id="calendar"></div>
+        </div>
+
+        <!-- Step: times -->
+        <div id="step-times" class="step" style="display:none">
+          <div class="step-header">
+            <button class="back-btn" id="back-to-dates">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <h2 id="times-heading"></h2>
+          </div>
+          <div class="slots-grid" id="slots-grid"></div>
+        </div>
+
+        <!-- Step: form -->
+        <div id="step-form" class="step" style="display:none">
+          <div class="step-header">
+            <button class="back-btn" id="back-to-times">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <h2>Your details</h2>
+          </div>
+
+          <form id="booking-form">
+            <div class="field">
+              <label for="b-name">Full name</label>
+              <input id="b-name" type="text" required autocomplete="name" placeholder="Jane Smith" />
+            </div>
+            <div class="field">
+              <label for="b-email">Email address</label>
+              <input id="b-email" type="email" required autocomplete="email" placeholder="jane@example.com" />
+            </div>
+
+            <div class="field">
+              <label>Call type</label>
+              <div class="type-toggle">
+                <label class="type-opt">
+                  <input type="radio" name="meeting-type" value="phone" checked />
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+                    Phone call
+                  </span>
+                </label>
+                <label class="type-opt" id="opt-meet-wrap" style="display:none">
+                  <input type="radio" name="meeting-type" value="meet" />
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    Google Meet
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field" id="phone-field">
+              <label for="b-phone">Phone number</label>
+              <input id="b-phone" type="tel" autocomplete="tel" placeholder="+49 170 …" />
+            </div>
+
+            <div id="form-error" class="form-error" style="display:none"></div>
+            <button type="submit" class="btn-book" id="book-btn">Confirm booking</button>
+          </form>
+        </div>
+
+        <!-- Step: success -->
+        <div id="step-success" class="step step-success" style="display:none">
+          <div class="success-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>You're booked.</h2>
+          <p id="success-detail"></p>
+          <p class="success-hint">Check your email for a calendar invite.</p>
+        </div>
+
+      </main>
+    </div>
+
   </div>
 </Base>
 
 <style>
-  .booking-wrap {
+  * { box-sizing: border-box; }
+
+  .page {
     min-height: 100vh;
+    background: #F4F4F2;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
-    background: #F7F7F5;
+    padding: 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  .booking-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
-  }
-  .booking-header { margin-bottom: 1.5rem; }
-  .booking-header h1 { font-size: 1.3rem; font-weight: 700; }
-  .slot-duration { font-size: 0.85rem; color: #6B7280; margin-top: 0.2rem; }
 
-  .step h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; }
-  .back-btn { background: none; border: none; font-size: 0.85rem; color: #6B7280; cursor: pointer; font-family: inherit; padding: 0; margin-bottom: 1rem; }
-  .back-btn:hover { color: #0D0D0D; }
+  /* Loading / error states */
+  .center-state { text-align: center; padding: 4rem; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid #E5E7EB;
+    border-top-color: #2563EB;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { color: #6B7280; font-size: 0.9rem; }
+
+  /* Main layout */
+  #booking-ui {
+    display: flex;
+    width: 100%;
+    max-width: 820px;
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
+    min-height: 500px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: #FAFAFA;
+    border-right: 1px solid #F0F0F0;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .owner-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #2563EB;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  .sidebar h1 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0D0D0D;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #6B7280;
+  }
+  .meta-row svg { flex-shrink: 0; }
+
+  .selected-summary {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+  }
+  .summary-date { font-size: 0.8rem; font-weight: 600; color: #0D0D0D; }
+  .summary-time { font-size: 0.8rem; color: #6B7280; margin-top: 0.15rem; }
+
+  /* Main area */
+  .main { flex: 1; padding: 2rem; display: flex; flex-direction: column; }
+
+  .step-header { margin-bottom: 1.25rem; }
+  .step-header h2 { font-size: 1rem; font-weight: 600; color: #0D0D0D; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+    margin-bottom: 0.75rem;
+    transition: color 0.1s;
+  }
+  .back-btn:hover { color: #374151; }
 
   /* Calendar */
-  .calendar { display: flex; flex-direction: column; gap: 0.5rem; }
-  .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
-  .cal-head { font-size: 0.7rem; color: #9CA3AF; font-weight: 600; padding: 0.25rem 0; }
+  .calendar { display: flex; flex-direction: column; gap: 0.25rem; }
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .cal-nav button {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .cal-nav button:hover { background: #F3F4F6; }
+  .cal-nav span { font-size: 0.875rem; font-weight: 600; color: #0D0D0D; }
+
+  .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-head {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #9CA3AF;
+    text-align: center;
+    padding: 0.35rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
   .cal-day {
     aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background 0.1s;
+    font-size: 0.82rem;
+    transition: background 0.1s, color 0.1s;
+    position: relative;
   }
-  .cal-day.available:hover { background: #EFF6FF; }
+  .cal-day.available {
+    cursor: pointer;
+    font-weight: 500;
+    color: #0D0D0D;
+  }
+  .cal-day.available:hover { background: #EFF6FF; color: #2563EB; }
+  .cal-day.available::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #2563EB;
+  }
   .cal-day.selected { background: #2563EB; color: #fff; }
-  .cal-day.empty, .cal-day.past { color: #D1D5DB; cursor: default; }
-  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-  .cal-nav button { background: none; border: none; cursor: pointer; font-size: 1rem; color: #6B7280; padding: 0.25rem 0.5rem; }
-  .cal-nav span { font-size: 0.9rem; font-weight: 600; }
+  .cal-day.selected::after { background: #fff; }
+  .cal-day.today:not(.selected) { font-weight: 700; }
+  .cal-day.empty { pointer-events: none; }
+  .cal-day.past { color: #D1D5DB; pointer-events: none; }
 
-  /* Slots */
-  .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  /* Time slots */
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
   .slot-btn {
     border: 1px solid #E5E7EB;
     background: #fff;
     border-radius: 8px;
-    padding: 0.6rem;
+    padding: 0.6rem 0.4rem;
     font-size: 0.85rem;
+    font-weight: 500;
     font-family: inherit;
+    color: #2563EB;
     cursor: pointer;
-    transition: border-color 0.1s, background 0.1s;
+    transition: all 0.1s;
     text-align: center;
   }
   .slot-btn:hover { border-color: #2563EB; background: #EFF6FF; }
   .slot-btn.selected { border-color: #2563EB; background: #2563EB; color: #fff; }
 
   /* Form */
-  .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; }
-  .field label { font-size: 0.85rem; font-weight: 500; }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.875rem; }
+  .field label { font-size: 0.8rem; font-weight: 600; color: #374151; }
   .field input {
-    border: 1px solid #D1D5DB; border-radius: 8px;
-    padding: 0.6rem 0.75rem; font-size: 0.9rem; font-family: inherit;
-    outline: none; transition: border-color 0.15s;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #0D0D0D;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
   }
-  .field input:focus { border-color: #2563EB; }
+  .field input::placeholder { color: #C4C4C4; }
+  .field input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
 
-  .meeting-toggle { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
-  .toggle-opt { display: flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; cursor: pointer; }
+  /* Meeting type toggle */
+  .type-toggle { display: flex; gap: 0.5rem; }
+  .type-opt { cursor: pointer; }
+  .type-opt input { display: none; }
+  .type-opt span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+  .type-opt input:checked + span {
+    border-color: #2563EB;
+    color: #2563EB;
+    background: #EFF6FF;
+  }
 
-  .form-error { background: #FEF2F2; color: #DC2626; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+  .form-error {
+    background: #FEF2F2;
+    color: #DC2626;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
+  }
 
   .btn-book {
     width: 100%;
     background: #2563EB;
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 0.7rem;
+    border-radius: 10px;
+    padding: 0.8rem;
     font-size: 0.95rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     transition: background 0.15s;
     margin-top: 0.25rem;
+    letter-spacing: -0.01em;
   }
   .btn-book:hover { background: #1D4ED8; }
-  .btn-book:disabled { opacity: 0.6; cursor: default; }
+  .btn-book:disabled { opacity: 0.55; cursor: default; }
 
   /* Success */
-  .step-success { text-align: center; padding: 1rem 0; }
-  .success-icon { font-size: 2.5rem; color: #16A34A; margin-bottom: 0.75rem; }
-  .step-success h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
-  .step-success p { color: #6B7280; font-size: 0.9rem; }
-  .success-hint { margin-top: 0.5rem; font-size: 0.8rem; }
-  .load-error { color: #DC2626; font-size: 0.9rem; }
+  .step-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    padding: 2rem 1rem;
+  }
+  .success-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #DCFCE7;
+    color: #16A34A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .step-success h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .step-success #success-detail { font-size: 0.9rem; color: #374151; font-weight: 500; }
+  .success-hint { font-size: 0.8rem; color: #9CA3AF; margin-top: 0.5rem; }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .page { padding: 0; align-items: flex-start; }
+    #booking-ui { flex-direction: column; border-radius: 0; min-height: 100vh; box-shadow: none; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #F0F0F0; padding: 1.5rem; }
+    .slots-grid { grid-template-columns: repeat(4, 1fr); }
+  }
 </style>
 
 <script>
@@ -178,68 +419,91 @@ import Base from '../layouts/Base.astro';
   let selectedDate = null;
   let selectedSlot = null;
 
+  const steps = ['step-dates','step-times','step-form','step-success','step-error'];
+  function show(id) {
+    steps.forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.style.display = s === id ? '' : 'none';
+    });
+  }
+
   async function init() {
+    if (!slug) { document.getElementById('step-loading').style.display = 'none'; show('step-error'); return; }
+
     try {
-      const res = await fetch(`${API}/book/${slug}/config`);
-      if (!res.ok) throw new Error();
-      settings = await res.json();
+      const [cfgRes, slotsRes] = await Promise.all([
+        fetch(`${API}/book/${slug}/config`),
+        fetch(`${API}/book/${slug}/slots?timezone=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)}`),
+      ]);
+      if (!cfgRes.ok) throw new Error();
+      settings = await cfgRes.json();
+      slots    = await slotsRes.json();
 
-      document.getElementById('owner-name').textContent = `Book a call with ${settings.owner_name}`;
-      document.getElementById('slot-duration').textContent = `${settings.slot_minutes} minutes`;
+      const initials = (settings.owner_name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('owner-avatar').textContent = initials;
+      document.getElementById('owner-name').textContent   = settings.owner_name;
+      document.getElementById('duration-label').textContent = `${settings.slot_minutes} min`;
 
-      const slotsRes = await fetch(`${API}/book/${slug}/slots`);
-      slots = await slotsRes.json();
+      if (settings.google_meet) {
+        document.getElementById('opt-meet-wrap').style.display = '';
+      }
 
+      document.getElementById('step-loading').style.display = 'none';
+      document.getElementById('booking-ui').style.display   = '';
+      show('step-dates');
       renderCalendar();
     } catch {
+      document.getElementById('step-loading').style.display = 'none';
       show('step-error');
     }
   }
 
-  function show(id) {
-    ['step-dates','step-times','step-form','step-success','step-error'].forEach(s => {
-      document.getElementById(s).style.display = s === id ? '' : 'none';
-    });
-  }
-
   // Calendar
-  let calYear = new Date().getFullYear();
+  let calYear  = new Date().getFullYear();
   let calMonth = new Date().getMonth();
 
   function renderCalendar() {
-    const wrap = document.getElementById('calendar');
-    const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-    const monthName = new Date(calYear, calMonth, 1).toLocaleString('en', { month: 'long', year: 'numeric' });
+    const wrap  = document.getElementById('calendar');
+    const days  = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+    const month = new Date(calYear, calMonth, 1);
+    const monthName = month.toLocaleString('en', { month: 'long', year: 'numeric' });
 
-    const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const offset = (firstDay === 0 ? 6 : firstDay - 1);
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const today = new Date(); today.setHours(0,0,0,0);
+    const firstDay = month.getDay();
+    const offset   = firstDay === 0 ? 6 : firstDay - 1;
+    const total    = new Date(calYear, calMonth + 1, 0).getDate();
+    const today    = new Date(); today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().slice(0, 10);
 
-    let html = `<div class="cal-nav">
-      <button id="cal-prev">‹</button>
-      <span>${monthName}</span>
-      <button id="cal-next">›</button>
-    </div>
-    <div class="cal-row">${days.map(d => `<div class="cal-head">${d}</div>`).join('')}</div>`;
+    let html = `
+      <div class="cal-nav">
+        <button id="cal-prev">‹</button>
+        <span>${monthName}</span>
+        <button id="cal-next">›</button>
+      </div>
+      <div class="cal-row">${days.map(d => `<div class="cal-head">${d}</div>`).join('')}</div>`;
 
     let cells = Array(offset).fill('<div class="cal-day empty"></div>');
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(calYear, calMonth, d);
-      const ymd = date.toISOString().slice(0, 10);
-      const isPast = date < today;
-      const hasSlots = slots[ymd] && slots[ymd].length > 0;
-      const cls = isPast ? 'past' : hasSlots ? 'available' : 'past';
-      const sel = ymd === selectedDate ? ' selected' : '';
-      cells.push(`<div class="cal-day ${cls}${sel}" data-date="${ymd}">${d}</div>`);
+    for (let d = 1; d <= total; d++) {
+      const date    = new Date(calYear, calMonth, d);
+      const ymd     = date.toISOString().slice(0, 10);
+      const isPast  = date < today;
+      const hasSl   = !isPast && slots[ymd]?.length > 0;
+      const isToday = ymd === todayStr;
+      const isSel   = ymd === selectedDate;
+      const cls     = [
+        'cal-day',
+        isPast ? 'past' : hasSl ? 'available' : 'past',
+        isToday ? 'today' : '',
+        isSel   ? 'selected' : '',
+      ].filter(Boolean).join(' ');
+      cells.push(`<div class="${cls}" data-date="${ymd}">${d}</div>`);
     }
 
     const rows = [];
     for (let i = 0; i < cells.length; i += 7) {
       rows.push(`<div class="cal-row">${cells.slice(i, i+7).join('')}</div>`);
     }
-    html += rows.join('');
-    wrap.innerHTML = html;
+    wrap.innerHTML = html + rows.join('');
 
     wrap.querySelectorAll('.cal-day.available').forEach(el => {
       el.addEventListener('click', () => {
@@ -249,32 +513,36 @@ import Base from '../layouts/Base.astro';
       });
     });
     document.getElementById('cal-prev')?.addEventListener('click', () => {
-      calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (--calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendar();
     });
     document.getElementById('cal-next')?.addEventListener('click', () => {
-      calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (++calMonth > 11) { calMonth = 0; calYear++; }
       renderCalendar();
     });
   }
 
   function renderSlots(date) {
-    const heading = document.getElementById('times-heading');
-    heading.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+    const d   = new Date(date + 'T00:00:00');
+    const hdr = document.getElementById('times-heading');
+    hdr.textContent = d.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    // Update sidebar summary
+    document.getElementById('summary-date').textContent = d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
+    document.getElementById('selected-summary').style.display = '';
 
     const grid = document.getElementById('slots-grid');
-    const daySlots = slots[date] || [];
-    grid.innerHTML = daySlots.map(s =>
-      `<button class="slot-btn" data-start="${s.start}" data-end="${s.end}">${s.label.split(' – ')[0]}</button>`
+    grid.innerHTML = (slots[date] || []).map(s =>
+      `<button class="slot-btn" data-start="${s.start}" data-end="${s.end}">${s.label.split(' - ')[0]}</button>`
     ).join('');
 
     grid.querySelectorAll('.slot-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         grid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        selectedSlot = { start: btn.dataset.start, end: btn.dataset.end, label: btn.textContent };
-        document.getElementById('selected-slot-label').textContent =
-          new Date(selectedSlot.start).toLocaleString('en', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        selectedSlot = { start: btn.dataset.start, end: btn.dataset.end };
+
+        document.getElementById('summary-time').textContent = btn.textContent;
         show('step-form');
       });
     });
@@ -286,41 +554,39 @@ import Base from '../layouts/Base.astro';
   // Meeting type toggle
   document.querySelectorAll('input[name="meeting-type"]').forEach(r => {
     r.addEventListener('change', () => {
-      const phoneField = document.getElementById('phone-field');
-      phoneField.style.display = r.value === 'phone' ? '' : 'none';
+      document.getElementById('phone-field').style.display = r.value === 'phone' ? '' : 'none';
     });
   });
 
-  // Booking form
-  document.getElementById('booking-form')?.addEventListener('submit', async (e) => {
+  // Booking form submit
+  document.getElementById('booking-form')?.addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = document.getElementById('book-btn');
-    const errEl = document.getElementById('form-error');
-    btn.disabled = true;
-    btn.textContent = 'Confirming…';
-    errEl.style.display = 'none';
+    const btn    = document.getElementById('book-btn') as HTMLButtonElement;
+    const errEl  = document.getElementById('form-error') as HTMLElement;
+    const isMeet = (document.querySelector('input[name="meeting-type"]:checked') as HTMLInputElement).value === 'meet';
+    const name   = (document.getElementById('b-name') as HTMLInputElement).value;
+    const email  = (document.getElementById('b-email') as HTMLInputElement).value;
+    const phone  = (document.getElementById('b-phone') as HTMLInputElement).value;
 
-    const isGoogleMeet = document.querySelector('input[name="meeting-type"]:checked').value === 'meet';
-    const name = document.getElementById('b-name').value;
-    const email = document.getElementById('b-email').value;
-    const note = document.getElementById('b-phone').value;
-
-    if (!isGoogleMeet && !note) {
-      errEl.textContent = 'Please enter your phone number.';
-      errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Confirm booking';
+    if (!isMeet && !phone) {
+      errEl.textContent    = 'Please enter your phone number.';
+      errEl.style.display  = 'block';
       return;
     }
 
+    btn.disabled    = true;
+    btn.textContent = 'Confirming…';
+    errEl.style.display = 'none';
+
     try {
-      const res = await fetch(`${API}/book/${slug}/book`, {
+      const res  = await fetch(`${API}/book/${slug}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           slot_start: selectedSlot.start,
-          name, email, note,
-          is_google_meet: isGoogleMeet ? 1 : 0,
+          name, email,
+          note: phone,
+          is_google_meet: isMeet ? 1 : 0,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
@@ -330,11 +596,11 @@ import Base from '../layouts/Base.astro';
       document.getElementById('success-detail').textContent =
         new Date(selectedSlot.start).toLocaleString('en', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       show('step-success');
-    } catch (err) {
-      errEl.textContent = err.message;
+    } catch (err: any) {
+      errEl.textContent   = err.message;
       errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Confirm booking';
+      btn.disabled        = false;
+      btn.textContent     = 'Confirm booking';
     }
   });
 
