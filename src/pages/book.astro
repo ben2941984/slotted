@@ -512,6 +512,10 @@ import Base from '../layouts/Base.astro';
   let selectedDate = null;
   let selectedSlot = null;
 
+  function toYmd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   const steps = ['step-dates','step-times','step-form','step-success','step-error'];
   function show(id) {
     steps.forEach(s => {
@@ -570,7 +574,7 @@ import Base from '../layouts/Base.astro';
     const offset   = firstDay === 0 ? 6 : firstDay - 1;
     const total    = new Date(calYear, calMonth + 1, 0).getDate();
     const today    = new Date(); today.setHours(0,0,0,0);
-    const todayStr = today.toISOString().slice(0, 10);
+    const todayStr = toYmd(today);
 
     let html = `
       <div class="cal-nav">
@@ -583,7 +587,7 @@ import Base from '../layouts/Base.astro';
     let cells = Array(offset).fill('<div class="cal-day empty"></div>');
     for (let d = 1; d <= total; d++) {
       const date    = new Date(calYear, calMonth, d);
-      const ymd     = date.toISOString().slice(0, 10);
+      const ymd     = toYmd(date);
       const isPast  = date < today;
       const hasSl   = !isPast && slots[ymd]?.length > 0;
       const isToday = ymd === todayStr;
