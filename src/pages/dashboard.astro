@@ -6,9 +6,13 @@ import Base from '../layouts/Base.astro';
     <nav class="sidebar">
       <div class="sidebar-logo">Slotted</div>
       <ul class="sidebar-nav">
-        <li><a href="/dashboard" class="active">Bookings</a></li>
-        <li><a href="/dashboard/settings">Settings</a></li>
+        <li><a href="/dashboard" class="active" id="nav-bookings">Bookings</a></li>
+        <li><a href="/dashboard/settings" id="nav-settings">Settings</a></li>
       </ul>
+      <div class="lang-toggle" id="lang-toggle">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+      </div>
       <button class="logout-btn" id="logout-btn">Log out</button>
     </nav>
 
@@ -30,7 +34,7 @@ import Base from '../layouts/Base.astro';
             <button class="embed-toggle" id="embed-toggle">Show embed snippet ↓</button>
           </div>
           <div id="embed-snippet" style="display:none">
-            <div class="embed-snippet-label">Paste this on your website</div>
+            <div class="embed-snippet-label" id="embed-snippet-label">Paste this on your website</div>
             <pre id="embed-code" class="embed-code"></pre>
             <button class="copy-btn" id="copy-btn">Copy</button>
           </div>
@@ -44,11 +48,11 @@ import Base from '../layouts/Base.astro';
         <table class="bookings-table" id="bookings-table" style="display:none">
           <thead>
             <tr>
-              <th>Date & time</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Type</th>
-              <th>Status</th>
+              <th id="th-datetime">Date &amp; time</th>
+              <th id="th-name">Name</th>
+              <th id="th-email">Email</th>
+              <th id="th-type">Type</th>
+              <th id="th-status">Status</th>
               <th></th>
             </tr>
           </thead>
@@ -197,6 +201,11 @@ import Base from '../layouts/Base.astro';
   .embed-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9CA3AF; margin-bottom: 0.2rem; }
   .embed-link { font-size: 0.875rem; color: #2563EB; font-family: monospace; }
   .embed-link:hover { text-decoration: underline; }
+  .lang-toggle { display: flex; gap: 0.25rem; padding: 0 0.5rem; margin-top: auto; margin-bottom: 0.5rem; }
+  .lang-btn { background: none; border: none; color: #9CA3AF; font-size: 0.75rem; font-family: inherit; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.1s; }
+  .lang-btn:hover { color: #fff; }
+  .lang-btn.active { color: #fff; background: rgba(255,255,255,0.1); }
+
   .embed-toggle { background: none; border: 1px solid #D1D5DB; border-radius: 6px; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-family: inherit; cursor: pointer; color: #374151; transition: background 0.1s; }
   .embed-toggle:hover { background: #fff; }
   .embed-snippet-label { font-size: 0.75rem; font-weight: 600; color: #9CA3AF; margin-bottom: 0.5rem; }
@@ -220,14 +229,99 @@ import Base from '../layouts/Base.astro';
   const token = localStorage.getItem('sl_token');
   if (!token) window.location.href = '/login';
 
+  // ── i18n ─────────────────────────────────────────────────────────────────
+  const DASH_T = {
+    en: {
+      bookings:       'Bookings',
+      settings:       'Settings',
+      logout:         'Log out',
+      bookingLink:    'Your booking link',
+      showSnippet:    'Show embed snippet ↓',
+      hideSnippet:    'Hide snippet ↑',
+      pasteOnSite:    'Paste this on your website',
+      copy:           'Copy',
+      copied:         'Copied',
+      noBookings:     'No bookings yet. Share your booking link to get started.',
+      datetime:       'Date & time',
+      name:           'Name',
+      email:          'Email',
+      type:           'Type',
+      status:         'Status',
+      cancel:         'Cancel',
+      cancelConfirm:  'Cancel this booking?',
+      confirmed:      'confirmed',
+      cancelled:      'cancelled',
+      phone:          'Phone',
+    },
+    de: {
+      bookings:       'Buchungen',
+      settings:       'Einstellungen',
+      logout:         'Abmelden',
+      bookingLink:    'Dein Buchungslink',
+      showSnippet:    'Einbetten ↓',
+      hideSnippet:    'Ausblenden ↑',
+      pasteOnSite:    'Auf deiner Website einbetten',
+      copy:           'Kopieren',
+      copied:         'Kopiert',
+      noBookings:     'Noch keine Buchungen. Teile deinen Buchungslink.',
+      datetime:       'Datum & Uhrzeit',
+      name:           'Name',
+      email:          'E-Mail',
+      type:           'Art',
+      status:         'Status',
+      cancel:         'Stornieren',
+      cancelConfirm:  'Buchung stornieren?',
+      confirmed:      'bestätigt',
+      cancelled:      'storniert',
+      phone:          'Telefon',
+    },
+  };
+
+  type Lang = 'en' | 'de';
+  let lang: Lang = (localStorage.getItem('sl_lang') as Lang) || 'en';
+
+  function applyLang() {
+    const t = DASH_T[lang];
+    const s = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    s('nav-bookings', t.bookings);
+    s('nav-settings', t.settings);
+    s('logout-btn', t.logout);
+    s('page-title', t.bookings);
+    s('embed-snippet-label', t.pasteOnSite);
+    s('empty-state', t.noBookings);
+    s('th-datetime', t.datetime);
+    s('th-name', t.name);
+    s('th-email', t.email);
+    s('th-type', t.type);
+    s('th-status', t.status);
+    // Toggle buttons
+    document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+  }
+
+  applyLang();
+
+  document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang as Lang;
+      localStorage.setItem('sl_lang', lang);
+      applyLang();
+      loadBookings();
+    });
+  });
+
+  // ── Slug & embed ─────────────────────────────────────────────────────────
   const slug = localStorage.getItem('sl_slug') || '';
   const linkEl = document.getElementById('booking-link');
   if (linkEl && slug) linkEl.textContent = `slotted.de/book?s=${slug}`;
 
+  let _embedSnippet = '';
+
   async function buildEmbed() {
     if (!slug) return;
+    const t = DASH_T[lang];
 
-    // Load design settings
     let theme = 'light', layout = 'default';
     try {
       const res = await fetch(`${window.SL_API}/settings`, {
@@ -238,14 +332,15 @@ import Base from '../layouts/Base.astro';
       layout = s.embed_layout ?? 'default';
     } catch {}
 
-    const params  = new URLSearchParams({ s: slug });
+    const params = new URLSearchParams({ s: slug });
     if (theme  !== 'light')   params.set('theme',  theme);
     if (layout !== 'default') params.set('layout', layout);
+    if (lang   !== 'en')      params.set('lang',   lang);
 
     const bookUrl = `https://slotted.de/book?${params}`;
     const height  = layout === 'mini' ? '420' : '600';
     const radius  = layout === 'mini' ? '10px' : '12px';
-    const snippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:${radius};border:1px solid #e5e7eb"\n></iframe>`;
+    _embedSnippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:${radius};border:1px solid #e5e7eb"\n></iframe>`;
 
     const panel = document.getElementById('embed-panel') as HTMLElement;
     panel.style.display = '';
@@ -255,26 +350,35 @@ import Base from '../layouts/Base.astro';
     linkA.href = `/book?${params}`;
 
     const code = document.getElementById('embed-code') as HTMLElement;
-    code.textContent = snippet;
+    code.textContent = _embedSnippet;
 
-    document.getElementById('embed-toggle')?.addEventListener('click', () => {
+    const toggleBtn = document.getElementById('embed-toggle') as HTMLButtonElement;
+    toggleBtn.textContent = t.showSnippet;
+
+    // Re-attach listeners (idempotent via clone)
+    const newToggle = toggleBtn.cloneNode(true) as HTMLButtonElement;
+    toggleBtn.replaceWith(newToggle);
+    newToggle.addEventListener('click', () => {
       const snip = document.getElementById('embed-snippet') as HTMLElement;
-      const btn  = document.getElementById('embed-toggle') as HTMLButtonElement;
       const open = snip.style.display === 'none';
       snip.style.display = open ? '' : 'none';
-      btn.textContent    = open ? 'Hide snippet ↑' : 'Show embed snippet ↓';
+      newToggle.textContent = open ? DASH_T[lang].hideSnippet : DASH_T[lang].showSnippet;
     });
 
-    document.getElementById('copy-btn')?.addEventListener('click', () => {
-      navigator.clipboard.writeText(snippet);
-      const btn = document.getElementById('copy-btn') as HTMLButtonElement;
-      btn.textContent = 'Copied';
-      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    const copyBtn = document.getElementById('copy-btn') as HTMLButtonElement;
+    const newCopy = copyBtn.cloneNode(true) as HTMLButtonElement;
+    newCopy.textContent = t.copy;
+    copyBtn.replaceWith(newCopy);
+    newCopy.addEventListener('click', () => {
+      navigator.clipboard.writeText(_embedSnippet);
+      newCopy.textContent = DASH_T[lang].copied;
+      setTimeout(() => { newCopy.textContent = DASH_T[lang].copy; }, 1500);
     });
   }
 
   buildEmbed();
 
+  // ── Logout ───────────────────────────────────────────────────────────────
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await fetch(`${window.SL_API}/auth/logout`, {
       method: 'POST',
@@ -286,7 +390,10 @@ import Base from '../layouts/Base.astro';
     window.location.href = '/login';
   });
 
+  // ── Bookings table ───────────────────────────────────────────────────────
   async function loadBookings() {
+    const t      = DASH_T[lang];
+    const locale = lang === 'de' ? 'de-DE' : 'en-GB';
     try {
       const res = await fetch(`${window.SL_API}/bookings`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
@@ -294,30 +401,41 @@ import Base from '../layouts/Base.astro';
       const data = await res.json();
       const bookings: any[] = data.data ?? data ?? [];
 
+      const emptyEl = document.getElementById('empty-state') as HTMLElement;
+      emptyEl.textContent = t.noBookings;
+
       if (bookings.length === 0) {
-        (document.getElementById('empty-state') as HTMLElement).style.display = 'block';
+        emptyEl.style.display = 'block';
+        (document.getElementById('bookings-table') as HTMLElement).style.display = 'none';
         return;
       }
 
+      emptyEl.style.display = 'none';
       const table = document.getElementById('bookings-table') as HTMLElement;
       const tbody = document.getElementById('bookings-body') as HTMLElement;
       table.style.display = 'table';
 
-      tbody.innerHTML = bookings.map((b: any) => `
-        <tr>
-          <td class="booking-date">${new Date(b.start_dt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })} – ${new Date(b.end_dt).toLocaleTimeString('de-DE', { timeStyle: 'short' })}</td>
+      tbody.innerHTML = bookings.map((b: any) => {
+        const dateStr = new Date(b.start_dt).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' })
+          + ' – ' + new Date(b.end_dt).toLocaleTimeString(locale, { timeStyle: 'short' });
+        const typeStr   = b.is_google_meet ? 'Google Meet' : t.phone;
+        const statusStr = b.status === 'confirmed' ? t.confirmed : t.cancelled;
+        const cancelBtn = b.status === 'confirmed'
+          ? `<button class="cancel-btn" data-id="${b.id}">${t.cancel}</button>` : '';
+        return `<tr>
+          <td class="booking-date">${dateStr}</td>
           <td>${b.name}</td>
           <td class="booking-email">${b.email}</td>
-          <td class="booking-type">${b.is_google_meet ? 'Google Meet' : 'Phone'}</td>
-          <td><span class="status-badge status-${b.status}">${b.status}</span></td>
-          <td>${b.status === 'confirmed' ? `<button class="cancel-btn" data-id="${b.id}">Cancel</button>` : ''}</td>
-        </tr>
-      `).join('');
+          <td class="booking-type">${typeStr}</td>
+          <td><span class="status-badge status-${b.status}">${statusStr}</span></td>
+          <td>${cancelBtn}</td>
+        </tr>`;
+      }).join('');
 
-      tbody.querySelectorAll('.cancel-btn').forEach(btn => {
+      tbody.querySelectorAll<HTMLButtonElement>('.cancel-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('Cancel this booking?')) return;
-          const id = (btn as HTMLElement).dataset.id;
+          if (!confirm(DASH_T[lang].cancelConfirm)) return;
+          const id = btn.dataset.id;
           await fetch(`${window.SL_API}/bookings/${id}/cancel`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },

@@ -6,15 +6,19 @@ import Base from '../../layouts/Base.astro';
     <nav class="sidebar">
       <div class="sidebar-logo">Slotted</div>
       <ul class="sidebar-nav">
-        <li><a href="/dashboard">Bookings</a></li>
-        <li><a href="/dashboard/settings" class="active">Settings</a></li>
+        <li><a href="/dashboard" id="nav-bookings">Bookings</a></li>
+        <li><a href="/dashboard/settings" class="active" id="nav-settings">Settings</a></li>
       </ul>
+      <div class="lang-toggle" id="lang-toggle">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="de">DE</button>
+      </div>
       <button class="logout-btn" id="logout-btn">Log out</button>
     </nav>
 
     <main class="main">
       <header class="main-header">
-        <h1>Settings</h1>
+        <h1 id="page-title">Settings</h1>
       </header>
 
       <div class="settings-wrap">
@@ -22,55 +26,55 @@ import Base from '../../layouts/Base.astro';
 
           <!-- Booking page -->
           <section class="settings-section">
-            <h2>Booking page</h2>
+            <h2 id="h-booking-page">Booking page</h2>
             <div class="field">
-              <label for="slug">Your booking link</label>
+              <label for="slug" id="label-slug">Your booking link</label>
               <div class="slug-wrap">
-                <span class="slug-prefix">slotted.de/book/</span>
+                <span class="slug-prefix">slotted.de/book?s=</span>
                 <input id="slug" type="text" placeholder="your-name" pattern="[a-z0-9\-]+" required />
               </div>
-              <p class="hint">Lowercase letters, numbers and hyphens only.</p>
+              <p class="hint" id="hint-slug">Lowercase letters, numbers and hyphens only.</p>
             </div>
           </section>
 
           <!-- Schedule -->
           <section class="settings-section">
-            <h2>Schedule</h2>
+            <h2 id="h-schedule">Schedule</h2>
             <div class="fields-row">
               <div class="field">
-                <label for="slot-minutes">Slot length (min)</label>
+                <label for="slot-minutes" id="label-slot">Slot length (min)</label>
                 <input id="slot-minutes" type="number" min="5" max="480" value="30" />
               </div>
               <div class="field">
-                <label for="buffer-minutes">Buffer after slot (min)</label>
+                <label for="buffer-minutes" id="label-buffer">Buffer after slot (min)</label>
                 <input id="buffer-minutes" type="number" min="0" max="240" value="0" />
               </div>
               <div class="field">
-                <label for="days-ahead">Days available ahead</label>
+                <label for="days-ahead" id="label-days-ahead">Days available ahead</label>
                 <input id="days-ahead" type="number" min="1" max="365" value="21" />
               </div>
               <div class="field">
-                <label for="lead-hours">Min. lead time (hours)</label>
+                <label for="lead-hours" id="label-lead">Min. lead time (hours)</label>
                 <input id="lead-hours" type="number" min="0" max="720" value="24" />
               </div>
             </div>
             <div class="fields-row">
               <div class="field">
-                <label for="day-start">Day start</label>
+                <label for="day-start" id="label-day-start">Day start</label>
                 <input id="day-start" type="time" value="09:00" />
               </div>
               <div class="field">
-                <label for="day-end">Day end</label>
+                <label for="day-end" id="label-day-end">Day end</label>
                 <input id="day-end" type="time" value="17:00" />
               </div>
             </div>
             <div class="field">
-              <label>Working days</label>
-              <div class="weekday-wrap">
+              <label id="label-workdays">Working days</label>
+              <div class="weekday-wrap" id="weekday-wrap">
                 {['Mo','Tu','We','Th','Fr','Sa','Su'].map((d, i) => (
                   <label class="weekday">
                     <input type="checkbox" value={i + 1} checked={i < 5} class="wd-check" />
-                    {d}
+                    <span class="wd-label">{d}</span>
                   </label>
                 ))}
               </div>
@@ -79,38 +83,38 @@ import Base from '../../layouts/Base.astro';
 
           <!-- iCloud -->
           <section class="settings-section">
-            <h2>iCloud Calendar</h2>
-            <p class="section-desc">Busy times from your iCloud calendar are blocked automatically. New bookings are added to your calendar.</p>
+            <h2 id="h-icloud">iCloud Calendar</h2>
+            <p class="section-desc" id="desc-icloud">Busy times from your iCloud calendar are blocked automatically. New bookings are added to your calendar.</p>
             <div class="field">
-              <label for="caldav-user">Apple ID</label>
+              <label for="caldav-user" id="label-apple-id">Apple ID</label>
               <input id="caldav-user" type="email" placeholder="you@icloud.com" />
             </div>
             <div class="field">
-              <label for="caldav-pass">App password</label>
+              <label for="caldav-pass" id="label-app-pass">App password</label>
               <input id="caldav-pass" type="text" autocomplete="new-password" placeholder="xxxx-xxxx-xxxx-xxxx" />
-              <p class="hint">Create at appleid.apple.com → Sign-In and Security → App Passwords</p>
+              <p class="hint" id="hint-app-pass">Create at appleid.apple.com → Sign-In and Security → App Passwords</p>
             </div>
             <div class="field">
-              <label for="caldav-url">Calendar URL <span class="optional">(auto-detected)</span></label>
+              <label for="caldav-url" id="label-cal-url">Calendar URL <span class="optional" id="label-auto-detected">(auto-detected)</span></label>
               <input id="caldav-url" type="url" placeholder="https://p…-caldav.icloud.com/…" />
             </div>
             <button type="button" class="btn-secondary" id="discover-btn">Detect calendar URL</button>
             <div id="icloud-connected-wrap" style="display:none;margin-top:0.75rem;align-items:center;gap:1rem">
-              <span class="google-ok">✓ iCloud Calendar connected</span>
+              <span class="google-ok" id="icloud-connected-label">✓ iCloud Calendar connected</span>
               <button type="button" class="btn-disconnect" id="icloud-disconnect-btn">Disconnect</button>
             </div>
           </section>
 
           <!-- Google Meet -->
           <section class="settings-section">
-            <h2>Google Meet</h2>
-            <p class="section-desc">When enabled, customers can choose a Google Meet call instead of a phone call. A Meet link is generated automatically.</p>
+            <h2 id="h-google">Google Meet</h2>
+            <p class="section-desc" id="desc-google">When enabled, customers can choose a Google Meet call instead of a phone call. A Meet link is generated automatically.</p>
             <div class="field">
-              <label for="google-client-id">Google Client ID</label>
+              <label for="google-client-id" id="label-client-id">Google Client ID</label>
               <input id="google-client-id" type="text" autocomplete="off" placeholder="….apps.googleusercontent.com" />
             </div>
             <div class="field">
-              <label for="google-client-secret">Client Secret</label>
+              <label for="google-client-secret" id="label-client-secret">Client Secret</label>
               <input id="google-client-secret" type="text" autocomplete="new-password" placeholder="xxxx-xxxx-xxxx-xxxx" />
             </div>
             <div id="google-status" class="google-status"></div>
@@ -118,51 +122,51 @@ import Base from '../../layouts/Base.astro';
               <button type="button" class="btn-secondary" id="google-connect-btn">Connect Google Calendar →</button>
             </div>
             <div id="google-connected-wrap" style="display:none;margin-top:0.75rem;align-items:center;gap:1rem">
-              <span class="google-ok">✓ Google Calendar connected</span>
+              <span class="google-ok" id="google-connected-label">✓ Google Calendar connected</span>
               <button type="button" class="btn-disconnect" id="google-disconnect-btn">Disconnect</button>
             </div>
           </section>
 
           <!-- Booking page design -->
           <section class="settings-section">
-            <h2>Booking page design</h2>
-            <p class="section-desc">Choose how the booking widget looks when embedded on your website.</p>
+            <h2 id="h-design">Booking page design</h2>
+            <p class="section-desc" id="desc-design">Choose how the booking widget looks when embedded on your website.</p>
 
             <div class="field">
-              <label>Theme</label>
+              <label id="label-theme">Theme</label>
               <div class="design-picker" id="theme-picker">
                 <button type="button" class="design-opt active" data-value="light">
                   <div class="design-preview preview-light">
                     <div class="dp-sidebar"></div>
                     <div class="dp-main"><div class="dp-cal"></div></div>
                   </div>
-                  <span>Light</span>
+                  <span id="opt-light">Light</span>
                 </button>
                 <button type="button" class="design-opt" data-value="dark">
                   <div class="design-preview preview-dark">
                     <div class="dp-sidebar"></div>
                     <div class="dp-main"><div class="dp-cal"></div></div>
                   </div>
-                  <span>Dark</span>
+                  <span id="opt-dark">Dark</span>
                 </button>
               </div>
             </div>
 
             <div class="field">
-              <label>Layout</label>
+              <label id="label-layout">Layout</label>
               <div class="design-picker" id="layout-picker">
                 <button type="button" class="design-opt active" data-value="default">
                   <div class="design-preview preview-light">
                     <div class="dp-sidebar"></div>
                     <div class="dp-main"><div class="dp-cal"></div></div>
                   </div>
-                  <span>Default</span>
+                  <span id="opt-default">Default</span>
                 </button>
                 <button type="button" class="design-opt" data-value="mini">
                   <div class="design-preview preview-light" style="justify-content:center">
                     <div class="dp-main dp-main--full"><div class="dp-cal"></div></div>
                   </div>
-                  <span>Mini</span>
+                  <span id="opt-mini">Mini</span>
                 </button>
               </div>
             </div>
@@ -183,6 +187,10 @@ import Base from '../../layouts/Base.astro';
   .sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
   .sidebar-nav a { display: block; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.875rem; color: #9CA3AF; transition: background 0.1s, color 0.1s; }
   .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.08); color: #fff; }
+  .lang-toggle { display: flex; gap: 0.25rem; padding: 0 0.5rem; margin-top: auto; margin-bottom: 0.5rem; }
+  .lang-btn { background: none; border: none; color: #9CA3AF; font-size: 0.75rem; font-family: inherit; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.1s; }
+  .lang-btn:hover { color: #fff; }
+  .lang-btn.active { color: #fff; background: rgba(255,255,255,0.1); }
   .logout-btn { background: none; border: none; color: #6B7280; font-size: 0.8rem; font-family: inherit; cursor: pointer; text-align: left; padding: 0.5rem 0.75rem; }
   .logout-btn:hover { color: #fff; }
 
@@ -303,6 +311,176 @@ import Base from '../../layouts/Base.astro';
   const token = localStorage.getItem('sl_token');
   if (!token) window.location.href = '/login';
 
+  // ── i18n ─────────────────────────────────────────────────────────────────
+  const SET_T = {
+    en: {
+      settings:          'Settings',
+      bookings:          'Bookings',
+      logout:            'Log out',
+      hBookingPage:      'Booking page',
+      labelSlug:         'Your booking link',
+      hintSlug:          'Lowercase letters, numbers and hyphens only.',
+      hSchedule:         'Schedule',
+      labelSlot:         'Slot length (min)',
+      labelBuffer:       'Buffer after slot (min)',
+      labelDaysAhead:    'Days available ahead',
+      labelLead:         'Min. lead time (hours)',
+      labelDayStart:     'Day start',
+      labelDayEnd:       'Day end',
+      labelWorkdays:     'Working days',
+      wdays:             ['Mo','Tu','We','Th','Fr','Sa','Su'],
+      hIcloud:           'iCloud Calendar',
+      descIcloud:        'Busy times from your iCloud calendar are blocked automatically. New bookings are added to your calendar.',
+      labelAppleId:      'Apple ID',
+      labelAppPass:      'App password',
+      hintAppPass:       'Create at appleid.apple.com → Sign-In and Security → App Passwords',
+      labelCalUrl:       'Calendar URL',
+      autoDetected:      '(auto-detected)',
+      detectBtn:         'Detect calendar URL',
+      detecting:         'Detecting…',
+      icloudConnected:   '✓ iCloud Calendar connected',
+      disconnect:        'Disconnect',
+      disconnectIcloud:  'Disconnect iCloud Calendar?',
+      hGoogle:           'Google Meet',
+      descGoogle:        'When enabled, customers can choose a Google Meet call instead of a phone call. A Meet link is generated automatically.',
+      labelClientId:     'Google Client ID',
+      labelClientSecret: 'Client Secret',
+      connectGoogle:     'Connect Google Calendar →',
+      googleConnected:   '✓ Google Calendar connected',
+      disconnectGoogle:  'Disconnect Google Calendar?',
+      hDesign:           'Booking page design',
+      descDesign:        'Choose how the booking widget looks when embedded on your website.',
+      labelTheme:        'Theme',
+      optLight:          'Light',
+      optDark:           'Dark',
+      labelLayout:       'Layout',
+      optDefault:        'Default',
+      optMini:           'Mini',
+      saveBtn:           'Save settings',
+      saving:            'Saving…',
+      saved:             'Settings saved.',
+      saveError:         'Could not save. Please try again.',
+      googleOk:          '✓ Google Calendar connected.',
+      googleFail:        'Google connection failed',
+    },
+    de: {
+      settings:          'Einstellungen',
+      bookings:          'Buchungen',
+      logout:            'Abmelden',
+      hBookingPage:      'Buchungsseite',
+      labelSlug:         'Dein Buchungslink',
+      hintSlug:          'Nur Kleinbuchstaben, Zahlen und Bindestriche.',
+      hSchedule:         'Zeitplan',
+      labelSlot:         'Slot-Länge (Min.)',
+      labelBuffer:       'Puffer nach Slot (Min.)',
+      labelDaysAhead:    'Verfügbare Tage im Voraus',
+      labelLead:         'Mindestvorlaufzeit (Stunden)',
+      labelDayStart:     'Tagesbeginn',
+      labelDayEnd:       'Tagesende',
+      labelWorkdays:     'Arbeitstage',
+      wdays:             ['Mo','Di','Mi','Do','Fr','Sa','So'],
+      hIcloud:           'iCloud-Kalender',
+      descIcloud:        'Termine aus deinem iCloud-Kalender werden automatisch blockiert. Neue Buchungen werden eingetragen.',
+      labelAppleId:      'Apple-ID',
+      labelAppPass:      'App-Passwort',
+      hintAppPass:       'Erstellen unter appleid.apple.com → Anmeldung und Sicherheit → App-Passwörter',
+      labelCalUrl:       'Kalender-URL',
+      autoDetected:      '(automatisch erkannt)',
+      detectBtn:         'Kalender-URL erkennen',
+      detecting:         'Wird erkannt…',
+      icloudConnected:   '✓ iCloud-Kalender verbunden',
+      disconnect:        'Trennen',
+      disconnectIcloud:  'iCloud-Kalender trennen?',
+      hGoogle:           'Google Meet',
+      descGoogle:        'Wenn aktiviert, können Kunden statt eines Anrufs ein Google Meet wählen. Der Link wird automatisch erstellt.',
+      labelClientId:     'Google Client-ID',
+      labelClientSecret: 'Client Secret',
+      connectGoogle:     'Google Kalender verbinden →',
+      googleConnected:   '✓ Google Kalender verbunden',
+      disconnectGoogle:  'Google Kalender trennen?',
+      hDesign:           'Design der Buchungsseite',
+      descDesign:        'Wähle, wie das Buchungs-Widget auf deiner Website aussieht.',
+      labelTheme:        'Farbschema',
+      optLight:          'Hell',
+      optDark:           'Dunkel',
+      labelLayout:       'Layout',
+      optDefault:        'Standard',
+      optMini:           'Mini',
+      saveBtn:           'Einstellungen speichern',
+      saving:            'Wird gespeichert…',
+      saved:             'Einstellungen gespeichert.',
+      saveError:         'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+      googleOk:          '✓ Google Kalender verbunden.',
+      googleFail:        'Google-Verbindung fehlgeschlagen',
+    },
+  };
+
+  type Lang = 'en' | 'de';
+  let lang: Lang = (localStorage.getItem('sl_lang') as Lang) || 'en';
+
+  function applyLang() {
+    const t = SET_T[lang];
+    const s = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const a = (id: string, attr: string, val: string) => { const el = document.getElementById(id) as HTMLInputElement; if (el) el[attr] = val; };
+    s('page-title',          t.settings);
+    s('nav-bookings',        t.bookings);
+    s('nav-settings',        t.settings);
+    s('logout-btn',          t.logout);
+    s('h-booking-page',      t.hBookingPage);
+    s('label-slug',          t.labelSlug);
+    s('hint-slug',           t.hintSlug);
+    s('h-schedule',          t.hSchedule);
+    s('label-slot',          t.labelSlot);
+    s('label-buffer',        t.labelBuffer);
+    s('label-days-ahead',    t.labelDaysAhead);
+    s('label-lead',          t.labelLead);
+    s('label-day-start',     t.labelDayStart);
+    s('label-day-end',       t.labelDayEnd);
+    s('label-workdays',      t.labelWorkdays);
+    s('h-icloud',            t.hIcloud);
+    s('desc-icloud',         t.descIcloud);
+    s('label-apple-id',      t.labelAppleId);
+    s('label-app-pass',      t.labelAppPass);
+    s('hint-app-pass',       t.hintAppPass);
+    s('label-cal-url',       t.labelCalUrl);
+    s('label-auto-detected', t.autoDetected);
+    s('discover-btn',        t.detectBtn);
+    s('icloud-connected-label', t.icloudConnected);
+    s('icloud-disconnect-btn',  t.disconnect);
+    s('h-google',            t.hGoogle);
+    s('desc-google',         t.descGoogle);
+    s('label-client-id',     t.labelClientId);
+    s('label-client-secret', t.labelClientSecret);
+    s('google-connect-btn',  t.connectGoogle);
+    s('google-connected-label', t.googleConnected);
+    s('google-disconnect-btn',  t.disconnect);
+    s('h-design',            t.hDesign);
+    s('desc-design',         t.descDesign);
+    s('label-theme',         t.labelTheme);
+    s('opt-light',           t.optLight);
+    s('opt-dark',            t.optDark);
+    s('label-layout',        t.labelLayout);
+    s('opt-default',         t.optDefault);
+    s('opt-mini',            t.optMini);
+    s('save-btn',            t.saveBtn);
+    // Weekday labels
+    document.querySelectorAll('.wd-label').forEach((el, i) => { if (t.wdays[i]) el.textContent = t.wdays[i]; });
+    // Lang buttons
+    document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+  }
+
+  applyLang();
+
+  document.querySelectorAll<HTMLButtonElement>('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang as Lang;
+      localStorage.setItem('sl_lang', lang);
+      applyLang();
+    });
+  });
+
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await fetch(`${window.SL_API}/auth/logout`, {
       method: 'POST',
@@ -403,7 +581,7 @@ import Base from '../../layouts/Base.astro';
 
   // iCloud disconnect
   document.getElementById('icloud-disconnect-btn')?.addEventListener('click', async () => {
-    if (!confirm('Disconnect iCloud Calendar?')) return;
+    if (!confirm(SET_T[lang].disconnectIcloud)) return;
     await fetch(`${window.SL_API}/caldav/disconnect`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
@@ -416,7 +594,7 @@ import Base from '../../layouts/Base.astro';
 
   // Google disconnect
   document.getElementById('google-disconnect-btn')?.addEventListener('click', async () => {
-    if (!confirm('Disconnect Google Calendar?')) return;
+    if (!confirm(SET_T[lang].disconnectGoogle)) return;
     await fetch(`${window.SL_API}/auth/google/disconnect`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
@@ -431,20 +609,20 @@ import Base from '../../layouts/Base.astro';
   if (urlParams.get('google') === 'connected') {
     const msg = document.getElementById('save-msg') as HTMLElement;
     msg.className = 'save-msg success';
-    msg.textContent = '✓ Google Calendar connected.';
+    msg.textContent = SET_T[lang].googleOk;
     msg.style.display = 'block';
     window.history.replaceState({}, '', '/dashboard/settings');
   } else if (urlParams.get('google') === 'error') {
     const msg = document.getElementById('save-msg') as HTMLElement;
     msg.className = 'save-msg error';
-    msg.textContent = 'Google connection failed (' + (urlParams.get('reason') || 'unknown') + ').';
+    msg.textContent = SET_T[lang].googleFail + ' (' + (urlParams.get('reason') || 'unknown') + ').';
     msg.style.display = 'block';
   }
 
   // Detect iCloud calendar URL
   document.getElementById('discover-btn')?.addEventListener('click', async () => {
     const btn = document.getElementById('discover-btn') as HTMLButtonElement;
-    btn.textContent = 'Detecting…';
+    btn.textContent = SET_T[lang].detecting;
     btn.disabled = true;
     try {
       const user = (document.getElementById('caldav-user') as HTMLInputElement).value;
@@ -457,7 +635,7 @@ import Base from '../../layouts/Base.astro';
       const data = await res.json();
       if (data.url) (document.getElementById('caldav-url') as HTMLInputElement).value = data.url;
     } catch {}
-    btn.textContent = 'Detect calendar URL';
+    btn.textContent = SET_T[lang].detectBtn;
     btn.disabled = false;
   });
 
@@ -505,7 +683,7 @@ import Base from '../../layouts/Base.astro';
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
+    saveBtn.textContent = SET_T[lang].saving;
     saveMsg.style.display = 'none';
 
     const ok = await saveSettings();
@@ -515,17 +693,17 @@ import Base from '../../layouts/Base.astro';
 
     if (ok) {
       saveMsg.className = 'save-msg success';
-      saveMsg.textContent = 'Settings saved.';
+      saveMsg.textContent = SET_T[lang].saved;
       if (clientIdVal && connectedWrap.style.display === 'none') {
         connectWrap.style.display = '';
       }
     } else {
       saveMsg.className = 'save-msg error';
-      saveMsg.textContent = 'Could not save. Please try again.';
+      saveMsg.textContent = SET_T[lang].saveError;
     }
 
     saveMsg.style.display = 'block';
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Save settings';
+    saveBtn.textContent = SET_T[lang].saveBtn;
   });
 </script>

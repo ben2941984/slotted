@@ -31,7 +31,7 @@ import Base from '../layouts/Base.astro';
         </div>
         <div class="meta-row">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Video or phone call</span>
+          <span id="video-or-phone-label">Video or phone call</span>
         </div>
         <div class="selected-summary" id="selected-summary" style="display:none">
           <div class="summary-date" id="summary-date"></div>
@@ -44,7 +44,7 @@ import Base from '../layouts/Base.astro';
         <!-- Step: dates -->
         <div id="step-dates" class="step">
           <div class="step-header">
-            <h2>Select a date</h2>
+            <h2 id="step-dates-heading">Select a date</h2>
           </div>
           <div class="calendar" id="calendar"></div>
         </div>
@@ -54,7 +54,7 @@ import Base from '../layouts/Base.astro';
           <div class="step-header">
             <button class="back-btn" id="back-to-dates">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-              Back
+              <span id="back-to-dates-label">Back</span>
             </button>
             <h2 id="times-heading"></h2>
           </div>
@@ -66,48 +66,48 @@ import Base from '../layouts/Base.astro';
           <div class="step-header">
             <button class="back-btn" id="back-to-times">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-              Back
+              <span id="back-to-times-label">Back</span>
             </button>
-            <h2>Your details</h2>
+            <h2 id="step-details-heading">Your details</h2>
           </div>
 
           <form id="booking-form">
             <div class="field">
-              <label for="b-name">Full name</label>
+              <label id="label-fullname" for="b-name">Full name</label>
               <input id="b-name" type="text" required autocomplete="name" placeholder="Jane Smith" />
             </div>
             <div class="field">
-              <label for="b-email">Email address</label>
+              <label id="label-email" for="b-email">Email address</label>
               <input id="b-email" type="email" required autocomplete="email" placeholder="jane@example.com" />
             </div>
 
             <div class="field">
-              <label>Call type</label>
+              <label id="label-calltype">Call type</label>
               <div class="type-toggle">
                 <label class="type-opt">
                   <input type="radio" name="meeting-type" value="phone" checked />
                   <span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
-                    Phone call
+                    <span id="label-phone-opt">Phone call</span>
                   </span>
                 </label>
                 <label class="type-opt" id="opt-meet-wrap" style="display:none">
                   <input type="radio" name="meeting-type" value="meet" />
                   <span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                    Google Meet
+                    <span id="label-meet-opt">Google Meet</span>
                   </span>
                 </label>
               </div>
             </div>
 
             <div class="field" id="phone-field">
-              <label for="b-phone">Phone number</label>
+              <label id="label-phone" for="b-phone">Phone number</label>
               <input id="b-phone" type="tel" autocomplete="tel" placeholder="+49 170 …" />
             </div>
 
             <div id="form-error" class="form-error" style="display:none"></div>
-            <button type="submit" class="btn-book" id="book-btn">Confirm booking</button>
+            <button type="submit" class="btn-book" id="btn-book">Confirm booking</button>
           </form>
         </div>
 
@@ -116,10 +116,10 @@ import Base from '../layouts/Base.astro';
           <div class="success-circle">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h2>You're booked.</h2>
+          <h2 id="success-heading">You're booked.</h2>
           <p id="success-detail"></p>
           <a id="success-meet-link" href="#" target="_blank" rel="noopener" class="meet-link" style="display:none">Join Google Meet →</a>
-          <p class="success-hint">Check your email for a calendar invite.</p>
+          <p class="success-hint" id="success-hint-txt">Check your email for a calendar invite.</p>
         </div>
 
       </main>
@@ -501,6 +501,83 @@ import Base from '../layouts/Base.astro';
   const theme  = params.get('theme') || 'light';
   const layout = params.get('layout') || 'default';
 
+  const browserLang = (navigator.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
+  const lang = (params.get('lang') || browserLang) as 'en' | 'de';
+
+  const T = {
+    en: {
+      selectDate:    'Select a date',
+      back:          'Back',
+      yourDetails:   'Your details',
+      fullName:      'Full name',
+      fullNamePh:    'Jane Smith',
+      email:         'Email address',
+      emailPh:       'jane@example.com',
+      callType:      'Call type',
+      phoneCall:     'Phone call',
+      phoneNumber:   'Phone number',
+      phonePh:       '+49 170 …',
+      confirm:       'Confirm booking',
+      confirming:    'Confirming…',
+      booked:        "You're booked.",
+      emailHint:     'Check your email for a calendar invite.',
+      joinMeet:      'Join Google Meet →',
+      videoOrPhone:  'Video or phone call',
+      notFound:      'This booking page could not be found.',
+      phoneRequired: 'Please enter your phone number.',
+      bookFailed:    'Could not confirm booking.',
+      min:           'min',
+      days:          ['Mo','Tu','We','Th','Fr','Sa','Su'],
+    },
+    de: {
+      selectDate:    'Datum wählen',
+      back:          'Zurück',
+      yourDetails:   'Deine Angaben',
+      fullName:      'Vollständiger Name',
+      fullNamePh:    'Max Mustermann',
+      email:         'E-Mail-Adresse',
+      emailPh:       'max@beispiel.de',
+      callType:      'Art des Gesprächs',
+      phoneCall:     'Telefonanruf',
+      phoneNumber:   'Telefonnummer',
+      phonePh:       '+49 170 …',
+      confirm:       'Buchung bestätigen',
+      confirming:    'Wird bestätigt…',
+      booked:        'Gebucht.',
+      emailHint:     'Du erhältst eine Kalendereinladung per E-Mail.',
+      joinMeet:      'Google Meet beitreten →',
+      videoOrPhone:  'Video- oder Telefonanruf',
+      notFound:      'Diese Buchungsseite wurde nicht gefunden.',
+      phoneRequired: 'Bitte Telefonnummer angeben.',
+      bookFailed:    'Buchung fehlgeschlagen. Bitte erneut versuchen.',
+      min:           'Min.',
+      days:          ['Mo','Di','Mi','Do','Fr','Sa','So'],
+    },
+  };
+  const t = T[lang];
+
+  // Apply translations to static HTML
+  const setTxt = (id: string, val: string) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setAttr = (id: string, attr: string, val: string) => { const el = document.getElementById(id) as HTMLInputElement; if (el) el[attr] = val; };
+
+  setTxt('video-or-phone-label', t.videoOrPhone);
+  setTxt('step-dates-heading',   t.selectDate);
+  setTxt('step-details-heading', t.yourDetails);
+  setTxt('label-fullname',       t.fullName);
+  setTxt('label-email',          t.email);
+  setTxt('label-calltype',       t.callType);
+  setTxt('label-phone',          t.phoneNumber);
+  setTxt('label-phone-opt',      t.phoneCall);
+  setTxt('label-meet-opt',       t.googleMeet ?? 'Google Meet');
+  setTxt('btn-book',             t.confirm);
+  setTxt('success-heading',      t.booked);
+  setTxt('success-hint-txt',     t.emailHint);
+  setTxt('back-to-dates-label',  t.back);
+  setTxt('back-to-times-label',  t.back);
+  setAttr('b-name',  'placeholder', t.fullNamePh);
+  setAttr('b-email', 'placeholder', t.emailPh);
+  setAttr('b-phone', 'placeholder', t.phonePh);
+
   // Apply theme + layout immediately
   const bookingUi = document.getElementById('booking-ui');
   const page      = document.querySelector('.page') as HTMLElement;
@@ -539,12 +616,12 @@ import Base from '../layouts/Base.astro';
       const initials = (settings.owner_name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       document.getElementById('owner-avatar').textContent = initials;
       document.getElementById('owner-name').textContent   = settings.owner_name;
-      document.getElementById('duration-label').textContent = `${settings.slot_minutes} min`;
+      document.getElementById('duration-label').textContent = `${settings.slot_minutes} ${t.min}`;
 
       // Mini header
       document.getElementById('mini-avatar').textContent = initials;
       document.getElementById('mini-name').textContent   = settings.owner_name;
-      document.getElementById('mini-meta').textContent   = `${settings.slot_minutes} min · Video or phone call`;
+      document.getElementById('mini-meta').textContent   = `${settings.slot_minutes} ${t.min} · ${t.videoOrPhone}`;
 
       if (settings.google_meet) {
         document.getElementById('opt-meet-wrap').style.display = '';
@@ -556,6 +633,7 @@ import Base from '../layouts/Base.astro';
       renderCalendar();
     } catch {
       document.getElementById('step-loading').style.display = 'none';
+      document.querySelector('.error-msg').textContent = t.notFound;
       show('step-error');
     }
   }
@@ -566,7 +644,7 @@ import Base from '../layouts/Base.astro';
 
   function renderCalendar() {
     const wrap  = document.getElementById('calendar');
-    const days  = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+    const days  = t.days;
     const month = new Date(calYear, calMonth, 1);
     const monthName = month.toLocaleString('en', { month: 'long', year: 'numeric' });
 
@@ -627,10 +705,10 @@ import Base from '../layouts/Base.astro';
   function renderSlots(date) {
     const d   = new Date(date + 'T00:00:00');
     const hdr = document.getElementById('times-heading');
-    hdr.textContent = d.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
+    hdr.textContent = d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', month: 'long', day: 'numeric' });
 
     // Update sidebar summary
-    document.getElementById('summary-date').textContent = d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
+    document.getElementById('summary-date').textContent = d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'short', month: 'short', day: 'numeric' });
     document.getElementById('selected-summary').style.display = '';
 
     const grid = document.getElementById('slots-grid');
@@ -671,13 +749,13 @@ import Base from '../layouts/Base.astro';
     const phone  = (document.getElementById('b-phone') as HTMLInputElement).value;
 
     if (!isMeet && !phone) {
-      errEl.textContent    = 'Please enter your phone number.';
+      errEl.textContent    = t.phoneRequired;
       errEl.style.display  = 'block';
       return;
     }
 
     btn.disabled    = true;
-    btn.textContent = 'Confirming…';
+    btn.textContent = t.confirming;
     errEl.style.display = 'none';
 
     try {
@@ -696,18 +774,19 @@ import Base from '../layouts/Base.astro';
       if (!res.ok) throw new Error(data.message || 'Could not confirm booking.');
 
       document.getElementById('success-detail').textContent =
-        new Date(selectedSlot.start).toLocaleString('en', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        new Date(selectedSlot.start).toLocaleString(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       const meetLinkEl = document.getElementById('success-meet-link') as HTMLAnchorElement;
       if (data.google_meet_link) {
-        meetLinkEl.href = data.google_meet_link;
+        meetLinkEl.href        = data.google_meet_link;
+        meetLinkEl.textContent = t.joinMeet;
         meetLinkEl.style.display = '';
       }
       show('step-success');
     } catch (err: any) {
-      errEl.textContent   = err.message;
+      errEl.textContent   = err.message || t.bookFailed;
       errEl.style.display = 'block';
       btn.disabled        = false;
-      btn.textContent     = 'Confirm booking';
+      btn.textContent     = t.confirm;
     }
   });
 
