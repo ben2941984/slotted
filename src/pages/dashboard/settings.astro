@@ -111,7 +111,7 @@ import Base from '../../layouts/Base.astro';
             </div>
             <div class="field">
               <label for="google-client-secret">Client Secret</label>
-              <input id="google-client-secret" type="text" autocomplete="new-password" placeholder="GOCSPX-…" />
+              <input id="google-client-secret" type="text" autocomplete="new-password" placeholder="xxxx-xxxx-xxxx-xxxx" />
             </div>
             <div id="google-status" class="google-status"></div>
             <div id="google-connect-wrap" style="display:none;margin-top:0.75rem">
@@ -216,7 +216,7 @@ import Base from '../../layouts/Base.astro';
       (document.getElementById('caldav-user') as HTMLInputElement).value = s.caldav_user ?? '';
       (document.getElementById('caldav-url') as HTMLInputElement).value = s.caldav_url ?? '';
       (document.getElementById('google-client-id') as HTMLInputElement).value = s.google_client_id ?? '';
-      if (s.has_caldav_pass) (document.getElementById('icloud-connected-wrap') as HTMLElement).style.display = '';
+      if (s.has_caldav_pass) (document.getElementById('icloud-connected-wrap') as HTMLElement).style.display = 'flex';
 
       const workdays: number[] = s.workdays ? s.workdays.split(',').map(Number) : [1,2,3,4,5];
       document.querySelectorAll<HTMLInputElement>('.wd-check').forEach(cb => {
@@ -235,6 +235,12 @@ import Base from '../../layouts/Base.astro';
   }
 
   loadSettings();
+
+  // Clear autofilled secret fields — browser fills them but backend never returns the values
+  setTimeout(() => {
+    (document.getElementById('caldav-pass') as HTMLInputElement).value = '';
+    (document.getElementById('google-client-secret') as HTMLInputElement).value = '';
+  }, 300);
 
   // Google OAuth connect
   document.getElementById('google-connect-btn')?.addEventListener('click', () => {
