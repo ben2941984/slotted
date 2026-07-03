@@ -138,38 +138,47 @@ import Base from '../layouts/Base.astro';
   }
   .bookings-table th {
     text-align: left;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    color: #6B7280;
+    color: #9CA3AF;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     border-bottom: 1px solid #E5E7EB;
   }
   .bookings-table td {
-    padding: 0.75rem;
+    padding: 0.85rem 1rem;
     border-bottom: 1px solid #F3F4F6;
     vertical-align: middle;
+    color: #111827;
   }
+  .bookings-table tr:last-child td { border-bottom: none; }
+  .bookings-table tbody tr:hover td { background: #F9FAFB; }
+  .booking-date { font-weight: 500; white-space: nowrap; }
+  .booking-email { color: #6B7280; font-size: 0.8rem; }
+  .booking-type { font-size: 0.8rem; color: #6B7280; }
   .status-badge {
     display: inline-block;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
-  .status-confirmed { background: #DCFCE7; color: #16A34A; }
+  .status-confirmed { background: #DCFCE7; color: #15803D; }
   .status-cancelled { background: #FEF2F2; color: #DC2626; }
   .cancel-btn {
     font-size: 0.75rem;
-    color: #DC2626;
+    color: #6B7280;
     background: none;
-    border: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
     cursor: pointer;
     font-family: inherit;
-    padding: 0;
+    padding: 0.25rem 0.6rem;
+    transition: border-color 0.1s, color 0.1s;
   }
-  .cancel-btn:hover { text-decoration: underline; }
+  .cancel-btn:hover { border-color: #DC2626; color: #DC2626; }
 
   .embed-box {
     margin: 1.5rem 2rem 0;
@@ -274,10 +283,10 @@ import Base from '../layouts/Base.astro';
 
       tbody.innerHTML = bookings.map((b: any) => `
         <tr>
-          <td>${new Date(b.start_dt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })} – ${new Date(b.end_dt).toLocaleTimeString('de-DE', { timeStyle: 'short' })}</td>
+          <td class="booking-date">${new Date(b.start_dt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })} – ${new Date(b.end_dt).toLocaleTimeString('de-DE', { timeStyle: 'short' })}</td>
           <td>${b.name}</td>
-          <td>${b.email}</td>
-          <td>${b.is_google_meet ? 'Google Meet' : 'Phone'}</td>
+          <td class="booking-email">${b.email}</td>
+          <td class="booking-type">${b.is_google_meet ? 'Google Meet' : 'Phone'}</td>
           <td><span class="status-badge status-${b.status}">${b.status}</span></td>
           <td>${b.status === 'confirmed' ? `<button class="cancel-btn" data-id="${b.id}">Cancel</button>` : ''}</td>
         </tr>
