@@ -82,7 +82,7 @@ import Base from '../layouts/Base.astro';
                     Phone call
                   </span>
                 </label>
-                <label class="type-opt" id="opt-meet-wrap">
+                <label class="type-opt" id="opt-meet-wrap" style="display:none">
                   <input type="radio" name="meeting-type" value="meet" />
                   <span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
@@ -444,7 +444,9 @@ import Base from '../layouts/Base.astro';
       document.getElementById('owner-name').textContent   = settings.owner_name;
       document.getElementById('duration-label').textContent = `${settings.slot_minutes} min`;
 
-      // Google Meet option always shown; link generated if owner has Google connected
+      if (settings.google_meet) {
+        document.getElementById('opt-meet-wrap').style.display = '';
+      }
 
       document.getElementById('step-loading').style.display = 'none';
       document.getElementById('booking-ui').style.display   = '';

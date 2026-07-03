@@ -110,6 +110,12 @@ import Base from '../../layouts/Base.astro';
               <input id="google-client-secret" type="password" />
             </div>
             <div id="google-status" class="google-status"></div>
+            <div id="google-connect-wrap" style="display:none;margin-top:0.75rem">
+              <button type="button" class="btn-secondary" id="google-connect-btn">Connect Google Calendar →</button>
+            </div>
+            <div id="google-connected-wrap" style="display:none;margin-top:0.75rem">
+              <span class="google-ok">✓ Google Calendar connected</span>
+            </div>
           </section>
 
           <div id="save-msg" class="save-msg" style="display:none"></div>
@@ -169,6 +175,7 @@ import Base from '../../layouts/Base.astro';
   .save-msg.success { background: #DCFCE7; color: #16A34A; }
   .save-msg.error { background: #FEF2F2; color: #DC2626; }
   .google-status { font-size: 0.85rem; margin-top: 0.5rem; }
+  .google-ok { font-size: 0.85rem; color: #16A34A; font-weight: 500; }
 </style>
 
 <script>
@@ -208,9 +215,11 @@ import Base from '../../layouts/Base.astro';
         cb.checked = workdays.includes(Number(cb.value));
       });
 
+      const clientId = (document.getElementById('google-client-id') as HTMLInputElement).value;
       if (s.google_connected) {
-        (document.getElementById('google-status') as HTMLElement).innerHTML =
-          '<span style="color:#16A34A">✓ Google Calendar connected</span>';
+        (document.getElementById('google-connected-wrap') as HTMLElement).style.display = '';
+      } else if (clientId) {
+        (document.getElementById('google-connect-wrap') as HTMLElement).style.display = '';
       }
 
       if (s.slug) localStorage.setItem('sl_slug', s.slug);
@@ -218,6 +227,26 @@ import Base from '../../layouts/Base.astro';
   }
 
   loadSettings();
+
+  // Google OAuth connect
+  document.getElementById('google-connect-btn')?.addEventListener('click', () => {
+    window.location.href = `${window.SL_API}/auth/google/redirect?token=${encodeURIComponent(token)}`;
+  });
+
+  // Show success/error from OAuth callback redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('google') === 'connected') {
+    const msg = document.getElementById('save-msg') as HTMLElement;
+    msg.className = 'save-msg success';
+    msg.textContent = '✓ Google Calendar connected.';
+    msg.style.display = 'block';
+    window.history.replaceState({}, '', '/dashboard/settings');
+  } else if (urlParams.get('google') === 'error') {
+    const msg = document.getElementById('save-msg') as HTMLElement;
+    msg.className = 'save-msg error';
+    msg.textContent = 'Google connection failed (' + (urlParams.get('reason') || 'unknown') + ').';
+    msg.style.display = 'block';
+  }
 
   // Detect iCloud calendar URL
   document.getElementById('discover-btn')?.addEventListener('click', async () => {
