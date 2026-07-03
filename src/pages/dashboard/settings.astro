@@ -396,7 +396,8 @@ import Base from '../../layouts/Base.astro';
   }, 300);
 
   // Google OAuth connect
-  document.getElementById('google-connect-btn')?.addEventListener('click', () => {
+  document.getElementById('google-connect-btn')?.addEventListener('click', async () => {
+    await saveSettings();
     window.location.href = `${window.SL_API}/auth/google/redirect?token=${encodeURIComponent(token)}`;
   });
 
@@ -465,12 +466,7 @@ import Base from '../../layouts/Base.astro';
   const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
   const saveMsg = document.getElementById('save-msg') as HTMLElement;
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
-    saveMsg.style.display = 'none';
-
+  async function saveSettings(): Promise<boolean> {
     const workdays = Array.from(document.querySelectorAll<HTMLInputElement>('.wd-check:checked'))
       .map(cb => cb.value).join(',');
 
@@ -498,18 +494,32 @@ import Base from '../../layouts/Base.astro';
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Failed to save.');
+      if (!res.ok) return false;
       if (payload.slug) localStorage.setItem('sl_slug', payload.slug);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    saveMsg.style.display = 'none';
+
+    const ok = await saveSettings();
+    const clientIdVal = (document.getElementById('google-client-id') as HTMLInputElement).value;
+    const connectedWrap = document.getElementById('google-connected-wrap') as HTMLElement;
+    const connectWrap   = document.getElementById('google-connect-wrap') as HTMLElement;
+
+    if (ok) {
       saveMsg.className = 'save-msg success';
       saveMsg.textContent = 'Settings saved.';
-      // Show connect button after save if client ID is present but not yet connected
-      const clientIdVal = payload.google_client_id;
-      const connectedWrap = document.getElementById('google-connected-wrap') as HTMLElement;
-      const connectWrap   = document.getElementById('google-connect-wrap') as HTMLElement;
       if (clientIdVal && connectedWrap.style.display === 'none') {
         connectWrap.style.display = '';
       }
-    } catch {
+    } else {
       saveMsg.className = 'save-msg error';
       saveMsg.textContent = 'Could not save. Please try again.';
     }
