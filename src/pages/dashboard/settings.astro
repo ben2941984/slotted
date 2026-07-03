@@ -123,6 +123,51 @@ import Base from '../../layouts/Base.astro';
             </div>
           </section>
 
+          <!-- Booking page design -->
+          <section class="settings-section">
+            <h2>Booking page design</h2>
+            <p class="section-desc">Choose how the booking widget looks when embedded on your website.</p>
+
+            <div class="field">
+              <label>Theme</label>
+              <div class="design-picker" id="theme-picker">
+                <button type="button" class="design-opt active" data-value="light">
+                  <div class="design-preview preview-light">
+                    <div class="dp-sidebar"></div>
+                    <div class="dp-main"><div class="dp-cal"></div></div>
+                  </div>
+                  <span>Light</span>
+                </button>
+                <button type="button" class="design-opt" data-value="dark">
+                  <div class="design-preview preview-dark">
+                    <div class="dp-sidebar"></div>
+                    <div class="dp-main"><div class="dp-cal"></div></div>
+                  </div>
+                  <span>Dark</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Layout</label>
+              <div class="design-picker" id="layout-picker">
+                <button type="button" class="design-opt active" data-value="default">
+                  <div class="design-preview preview-light">
+                    <div class="dp-sidebar"></div>
+                    <div class="dp-main"><div class="dp-cal"></div></div>
+                  </div>
+                  <span>Default</span>
+                </button>
+                <button type="button" class="design-opt" data-value="mini">
+                  <div class="design-preview preview-light" style="justify-content:center">
+                    <div class="dp-main dp-main--full"><div class="dp-cal"></div></div>
+                  </div>
+                  <span>Mini</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
           <div id="save-msg" class="save-msg" style="display:none"></div>
           <button type="submit" class="btn-primary" id="save-btn">Save settings</button>
         </form>
@@ -183,6 +228,75 @@ import Base from '../../layouts/Base.astro';
   .google-ok { font-size: 0.85rem; color: #16A34A; font-weight: 500; }
   .btn-disconnect { background: none; border: 1px solid #E5E7EB; border-radius: 6px; padding: 0.3rem 0.75rem; font-size: 0.8rem; color: #6B7280; font-family: inherit; cursor: pointer; }
   .btn-disconnect:hover { border-color: #DC2626; color: #DC2626; }
+
+  /* Design picker */
+  .design-picker { display: flex; gap: 0.75rem; }
+  .design-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    color: #6B7280;
+    transition: border-color 0.15s, color 0.15s;
+    min-width: 100px;
+  }
+  .design-opt.active { border-color: #2563EB; color: #2563EB; }
+  .design-opt:hover:not(.active) { border-color: #9CA3AF; color: #374151; }
+
+  .design-preview {
+    width: 80px;
+    height: 52px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid #E5E7EB;
+  }
+  .preview-light { background: #fff; }
+  .preview-dark  { background: #1C1C1E; border-color: #3A3A3C; }
+
+  .dp-sidebar {
+    width: 26px;
+    flex-shrink: 0;
+    background: #F3F4F6;
+    border-right: 1px solid #E5E7EB;
+  }
+  .preview-dark .dp-sidebar { background: #141414; border-right-color: #2A2A2A; }
+
+  .dp-main { flex: 1; padding: 5px; display: flex; flex-direction: column; gap: 3px; }
+  .dp-main--full { flex: 1; }
+  .dp-cal {
+    flex: 1;
+    border-radius: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      #E5E7EB 0px, #E5E7EB 1px,
+      transparent 1px, transparent 10px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #E5E7EB 0px, #E5E7EB 1px,
+      transparent 1px, transparent 10px
+    );
+  }
+  .preview-dark .dp-cal {
+    background: repeating-linear-gradient(
+      90deg,
+      #3A3A3C 0px, #3A3A3C 1px,
+      transparent 1px, transparent 10px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #3A3A3C 0px, #3A3A3C 1px,
+      transparent 1px, transparent 10px
+    );
+  }
 </style>
 
 <script>
@@ -231,8 +345,39 @@ import Base from '../../layouts/Base.astro';
       }
 
       if (s.slug) localStorage.setItem('sl_slug', s.slug);
+
+      // Design picker
+      setPickerActive('theme-picker',  s.embed_theme  ?? 'light');
+      setPickerActive('layout-picker', s.embed_layout ?? 'default');
     } catch {}
   }
+
+  function setPickerActive(pickerId: string, value: string) {
+    document.querySelectorAll<HTMLElement>(`#${pickerId} .design-opt`).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === value);
+    });
+    // Update dark preview when layout changes
+    if (pickerId === 'layout-picker') updateLayoutPreviewTheme();
+  }
+
+  function updateLayoutPreviewTheme() {
+    const theme = document.querySelector<HTMLElement>('#theme-picker .design-opt.active')?.dataset.value ?? 'light';
+    document.querySelectorAll<HTMLElement>('#layout-picker .design-preview').forEach(el => {
+      el.classList.toggle('preview-dark',  theme === 'dark');
+      el.classList.toggle('preview-light', theme !== 'dark');
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('#theme-picker .design-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setPickerActive('theme-picker', btn.dataset.value!);
+      updateLayoutPreviewTheme();
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('#layout-picker .design-opt').forEach(btn => {
+    btn.addEventListener('click', () => setPickerActive('layout-picker', btn.dataset.value!));
+  });
 
   loadSettings();
 
@@ -335,6 +480,8 @@ import Base from '../../layouts/Base.astro';
       caldav_url:           (document.getElementById('caldav-url') as HTMLInputElement).value,
       google_client_id:     (document.getElementById('google-client-id') as HTMLInputElement).value,
       google_client_secret: (document.getElementById('google-client-secret') as HTMLInputElement).value,
+      embed_theme:          document.querySelector<HTMLElement>('#theme-picker .design-opt.active')?.dataset.value ?? 'light',
+      embed_layout:         document.querySelector<HTMLElement>('#layout-picker .design-opt.active')?.dataset.value ?? 'default',
     };
 
     try {

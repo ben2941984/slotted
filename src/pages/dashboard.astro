@@ -224,16 +224,35 @@ import Base from '../layouts/Base.astro';
   const linkEl = document.getElementById('booking-link');
   if (linkEl && slug) linkEl.textContent = `slotted.de/book?s=${slug}`;
 
-  if (slug) {
-    const bookUrl = `https://slotted.de/book?s=${slug}`;
-    const snippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border-radius:12px;border:1px solid #e5e7eb"\n></iframe>`;
+  async function buildEmbed() {
+    if (!slug) return;
+
+    // Load design settings
+    let theme = 'light', layout = 'default';
+    try {
+      const res = await fetch(`${window.SL_API}/settings`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+      });
+      const s = await res.json();
+      theme  = s.embed_theme  ?? 'light';
+      layout = s.embed_layout ?? 'default';
+    } catch {}
+
+    const params  = new URLSearchParams({ s: slug });
+    if (theme  !== 'light')   params.set('theme',  theme);
+    if (layout !== 'default') params.set('layout', layout);
+
+    const bookUrl = `https://slotted.de/book?${params}`;
+    const height  = layout === 'mini' ? '420' : '600';
+    const radius  = layout === 'mini' ? '10px' : '12px';
+    const snippet = `<iframe\n  src="${bookUrl}"\n  width="100%"\n  height="${height}"\n  frameborder="0"\n  style="border-radius:${radius};border:1px solid #e5e7eb"\n></iframe>`;
 
     const panel = document.getElementById('embed-panel') as HTMLElement;
     panel.style.display = '';
 
     const linkA = document.getElementById('embed-link') as HTMLAnchorElement;
     linkA.textContent = bookUrl;
-    linkA.href = `/book?s=${slug}`;
+    linkA.href = `/book?${params}`;
 
     const code = document.getElementById('embed-code') as HTMLElement;
     code.textContent = snippet;
@@ -253,6 +272,8 @@ import Base from '../layouts/Base.astro';
       setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
     });
   }
+
+  buildEmbed();
 
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await fetch(`${window.SL_API}/auth/logout`, {

@@ -13,6 +13,15 @@ import Base from '../layouts/Base.astro';
     </div>
 
     <div id="booking-ui" style="display:none">
+      <!-- Mini layout header (hidden in default layout) -->
+      <div class="mini-header" id="mini-header" style="display:none">
+        <div class="mini-avatar" id="mini-avatar"></div>
+        <div>
+          <div class="mini-name" id="mini-name"></div>
+          <div class="mini-meta" id="mini-meta"></div>
+        </div>
+      </div>
+
       <aside class="sidebar">
         <div class="owner-avatar" id="owner-avatar"></div>
         <h1 id="owner-name"></h1>
@@ -412,11 +421,92 @@ import Base from '../layouts/Base.astro';
     .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #F0F0F0; padding: 1.5rem; }
     .slots-grid { grid-template-columns: repeat(4, 1fr); }
   }
+
+  /* ── Mini layout ─────────────────────────────── */
+  .mini-header { display: none; }
+
+  #booking-ui[data-layout="mini"] {
+    max-width: 440px;
+    flex-direction: column;
+  }
+  #booking-ui[data-layout="mini"] .sidebar { display: none; }
+  #booking-ui[data-layout="mini"] .mini-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem 0;
+  }
+  .mini-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #2563EB;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .mini-name { font-size: 0.9rem; font-weight: 600; color: #0D0D0D; }
+  .mini-meta { font-size: 0.75rem; color: #6B7280; margin-top: 0.1rem; }
+
+  /* ── Dark theme ──────────────────────────────── */
+  #booking-ui[data-theme="dark"] {
+    background: #1C1C1E;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.5);
+  }
+  #booking-ui[data-theme="dark"] .sidebar {
+    background: #141414;
+    border-right-color: #2A2A2A;
+  }
+  #booking-ui[data-theme="dark"] .sidebar h1 { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .meta-row { color: #8E8E93; }
+  #booking-ui[data-theme="dark"] .owner-avatar { background: #2563EB; }
+  #booking-ui[data-theme="dark"] .selected-summary { border-top-color: #2A2A2A; }
+  #booking-ui[data-theme="dark"] .summary-date { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .mini-header { background: transparent; }
+  #booking-ui[data-theme="dark"] .mini-name { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .mini-meta { color: #8E8E93; }
+  #booking-ui[data-theme="dark"] .step-header h2 { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .cal-nav span { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .cal-nav button { border-color: #3A3A3C; color: #8E8E93; background: transparent; }
+  #booking-ui[data-theme="dark"] .cal-nav button:hover { background: #2C2C2E; }
+  #booking-ui[data-theme="dark"] .cal-head { color: #636366; }
+  #booking-ui[data-theme="dark"] .cal-day.available { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .cal-day.available:hover { background: rgba(37,99,235,0.25); color: #60A5FA; }
+  #booking-ui[data-theme="dark"] .cal-day.past { color: #3A3A3C; }
+  #booking-ui[data-theme="dark"] .cal-day.today:not(.selected) { color: #60A5FA; }
+  #booking-ui[data-theme="dark"] .slot-btn { background: #2C2C2E; border-color: #3A3A3C; color: #60A5FA; }
+  #booking-ui[data-theme="dark"] .slot-btn:hover { border-color: #2563EB; background: rgba(37,99,235,0.2); }
+  #booking-ui[data-theme="dark"] .slot-btn.selected { background: #2563EB; border-color: #2563EB; color: #fff; }
+  #booking-ui[data-theme="dark"] .field label { color: #AEAEB2; }
+  #booking-ui[data-theme="dark"] .field input { background: #2C2C2E; border-color: #3A3A3C; color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] .field input::placeholder { color: #636366; }
+  #booking-ui[data-theme="dark"] .field input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+  #booking-ui[data-theme="dark"] .type-opt span { border-color: #3A3A3C; color: #8E8E93; }
+  #booking-ui[data-theme="dark"] .type-opt input:checked + span { border-color: #2563EB; color: #60A5FA; background: rgba(37,99,235,0.15); }
+  #booking-ui[data-theme="dark"] .back-btn { color: #636366; }
+  #booking-ui[data-theme="dark"] .back-btn:hover { color: #AEAEB2; }
+  #booking-ui[data-theme="dark"] .step-success h2 { color: #F5F5F5; }
+  #booking-ui[data-theme="dark"] #success-detail { color: #AEAEB2; }
+
+  .page[data-theme="dark"] { background: #0D0D0D; }
 </style>
 
 <script>
-  const API = window.SL_API;
-  const slug = new URLSearchParams(window.location.search).get('s') || '';
+  const API    = window.SL_API;
+  const params = new URLSearchParams(window.location.search);
+  const slug   = params.get('s') || '';
+  const theme  = params.get('theme') || 'light';
+  const layout = params.get('layout') || 'default';
+
+  // Apply theme + layout immediately
+  const bookingUi = document.getElementById('booking-ui');
+  const page      = document.querySelector('.page') as HTMLElement;
+  if (theme  === 'dark')  { bookingUi?.setAttribute('data-theme', 'dark');    page?.setAttribute('data-theme', 'dark'); }
+  if (layout === 'mini')  { bookingUi?.setAttribute('data-layout', 'mini'); }
+
   let settings = null;
   let slots = {};
   let selectedDate = null;
@@ -446,6 +536,11 @@ import Base from '../layouts/Base.astro';
       document.getElementById('owner-avatar').textContent = initials;
       document.getElementById('owner-name').textContent   = settings.owner_name;
       document.getElementById('duration-label').textContent = `${settings.slot_minutes} min`;
+
+      // Mini header
+      document.getElementById('mini-avatar').textContent = initials;
+      document.getElementById('mini-name').textContent   = settings.owner_name;
+      document.getElementById('mini-meta').textContent   = `${settings.slot_minutes} min · Video or phone call`;
 
       if (settings.google_meet) {
         document.getElementById('opt-meet-wrap').style.display = '';
